@@ -1,0 +1,17 @@
+name: lhcb-b2hhh
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - matplotlib
+  - scipy
+  - scikit-learn
+  - jupyterlab
+  - ipykernel
+  - uproot
+  - awkward
+  - vector
+  - hist
+  - mplhep
