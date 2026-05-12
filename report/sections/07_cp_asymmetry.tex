@@ -1,0 +1,56 @@
+\section{CP Asymmetry Study}
+
+\subsection{Charge separation}
+
+The CP-asymmetry notebook separates selected candidates according to the total charge of the three daughter tracks:
+\begin{equation}
+  Q_{\mathrm{tot}} = Q(H_1) + Q(H_2) + Q(H_3).
+\end{equation}
+Candidates with $Q_{\mathrm{tot}}=+1$ are classified as \Bplus{} candidates, while candidates with $Q_{\mathrm{tot}}=-1$ are classified as \Bminus{} candidates. This charge assignment is natural for a three-charged-hadron final state and uses the track-charge information reconstructed by the tracking system.
+
+Figure~\ref{fig:charge_masses} shows the selected invariant-mass distributions for the two charge categories. Comparing these distributions checks whether the reconstruction and selection behave similarly for the two charge-conjugate samples.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{B_plus_mass_distribution.png}
+    \caption{\Bplus{} candidates}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{B_minus_mass_distribution.png}
+    \caption{\Bminus{} candidates}
+  \end{subfigure}
+  \caption{Selected charge-separated B-candidate invariant-mass distributions.}
+  \label{fig:charge_masses}
+\end{figure}
+
+The overlaid comparison in Fig.~\ref{fig:cp_overlay} provides a compact visual summary of the charge-separated mass spectra. Similar peak shapes support the use of a common reconstruction and selection model, while differences in yield motivate the raw asymmetry calculation.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{cp_mass_overlay.png}
+  \caption{Overlay of selected \Bplus{} and \Bminus{} candidate mass spectra.}
+  \label{fig:cp_overlay}
+\end{figure}
+
+\subsection{Raw integrated asymmetry}
+
+The raw integrated asymmetry is computed in the signal window
+\begin{equation}
+  5270 < m_B < 5290~\mevcc.
+\end{equation}
+Using the event counts obtained in the notebook,
+\begin{equation}
+  N(\Bplus) = 282, \qquad N(\Bminus) = 246,
+\end{equation}
+the raw asymmetry is
+\begin{equation}
+  \ACP^{\mathrm{raw}} =
+  \frac{246 - 282}{246 + 282}
+  = -0.06818 .
+\end{equation}
+
+This value should be interpreted carefully. It is not a corrected CP-asymmetry measurement. It still includes possible detector effects, production asymmetry, residual background, finite-sample fluctuations, and the use of a single magnet polarity. A realistic CP analysis would fit the \Bplus{} and \Bminus{} mass spectra separately, subtract or model backgrounds, combine magnet polarities, and propagate systematic uncertainties. The current result is best viewed as a first diagnostic that demonstrates how a charge-asymmetry study is structured.

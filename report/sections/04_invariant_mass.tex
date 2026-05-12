@@ -1,0 +1,66 @@
+\section{Invariant Mass Reconstruction}
+
+\subsection{Relativistic mass formula}
+
+The key reconstructed observable is the invariant mass of the three-hadron B candidate. For a system of particles with total energy $E$ and total momentum $\vec{p}$, the invariant mass is defined by
+\begin{equation}
+  m^2 c^4 = E^2 - |\vec{p}|^2 c^2 .
+\end{equation}
+In high-energy-physics units with $c=1$, this becomes
+\begin{equation}
+  m^2 = E^2 - p_x^2 - p_y^2 - p_z^2 .
+  \label{eq:invariant_mass}
+\end{equation}
+
+For each daughter track, the analysis uses a charged-kaon mass hypothesis,
+\begin{equation}
+  m_K = \SI{493.677}{\mega\electronvolt}/c^2 ,
+\end{equation}
+and reconstructs the energy as
+\begin{equation}
+  E_i = \sqrt{p_{x,i}^2 + p_{y,i}^2 + p_{z,i}^2 + m_K^2}.
+\end{equation}
+The B-candidate four-vector is then the sum of the three daughter four-vectors:
+\begin{equation}
+  E_B = \sum_{i=1}^{3} E_i, \qquad
+  \vec{p}_B = \sum_{i=1}^{3} \vec{p}_i .
+\end{equation}
+Substituting these quantities into Eq.~\ref{eq:invariant_mass} gives the reconstructed B-candidate mass. The calculation is performed event-by-event with vectorised \texttt{numpy} operations.
+
+\subsection{Mass spectrum before and after selection}
+
+Figure~\ref{fig:mass_before} shows the reconstructed three-kaon mass spectrum before the baseline event selection. The distribution contains a broad combinatorial component as well as a visible accumulation near the expected B-meson mass region. This broad structure is typical of a preselection-level hadron-collider sample, where many random track combinations can satisfy a loose candidate definition.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{B_mass_before_cuts.png}
+  \caption{Reconstructed B-candidate invariant-mass distribution before baseline selection.}
+  \label{fig:mass_before}
+\end{figure}
+
+After applying quality, displacement, and kaon-PID selections, the mass spectrum becomes visibly cleaner, as shown in Fig.~\ref{fig:mass_after}. The selection enhances the relative contribution of candidates compatible with a displaced B decay and suppresses a large fraction of combinatorial background.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{B_mass_after_cuts.png}
+  \caption{Reconstructed B-candidate invariant-mass distribution after baseline physics selections.}
+  \label{fig:mass_after}
+\end{figure}
+
+\subsection{Signal-plus-background fit}
+
+A first signal extraction is performed with a simple Gaussian signal model plus a linear background model:
+\begin{equation}
+  f(m) =
+  A \exp\left[-\frac{(m-\mu)^2}{2\sigma^2}\right]
+  + a m + b .
+  \label{eq:mass_fit_model}
+\end{equation}
+This model is not intended to replace a full analysis fit, but it provides a useful validation of the reconstructed peak position and width. The fitted distribution is shown in Fig.~\ref{fig:mass_fit}. The visible peak near the B-meson mass demonstrates that the four-vector reconstruction and event selection are behaving sensibly.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{B_mass_fit.png}
+  \caption{Selected B-candidate mass spectrum fitted with a Gaussian signal component and linear background component.}
+  \label{fig:mass_fit}
+\end{figure}

@@ -1,0 +1,17 @@
+\section{Conclusion}
+
+This project demonstrates a complete and modern introductory HEP analysis workflow using LHCb CERN Open Data. Starting from ROOT ntuples, the analysis reads selected branches with \texttt{uproot}, processes candidates with \texttt{pandas} and \texttt{numpy}, reconstructs invariant masses, applies physics-motivated selections, generates publication-style plots, trains a sideband-labelled Random Forest classifier, computes a raw charge asymmetry, and visualises three-body phase space with Dalitz plots.
+
+The invariant-mass reconstruction shows a clear B-candidate peak after the baseline selection. A Gaussian-plus-linear fit provides a first signal-model validation. The signal/background classification study demonstrates how sideband labels can be combined with standard machine-learning tools, while the ROC curve and feature-importance plot provide useful performance diagnostics. The CP-asymmetry notebook separates \Bplus{} and \Bminus{} candidates and computes a raw integrated asymmetry in the signal window. The Dalitz analysis extends the project toward multibody-decay phase-space studies by reconstructing pairwise invariant-mass-squared variables.
+
+The analysis remains intentionally simplified. Several improvements would be required for a precision measurement:
+\begin{itemize}
+  \item train stronger classifiers such as XGBoost or gradient-boosted decision trees, with cross-validation and robust overtraining checks;
+  \item include detector effects, PID calibration, trigger efficiencies, and reconstruction asymmetries;
+  \item use simulation and control samples to validate selection efficiencies and background shapes;
+  \item combine MagnetUp and MagnetDown samples to reduce charge-dependent detector biases;
+  \item fit \Bplus{} and \Bminus{} mass spectra separately with more realistic signal and background models;
+  \item perform local CP-asymmetry studies across Dalitz-plot regions.
+\end{itemize}
+
+Despite these limitations, the project captures the core logic of a real experimental-particle-physics analysis: transparent event reconstruction, documented selection choices, modular code, reproducible figures, and explicit discussion of systematic limitations. It therefore provides a strong foundation for more advanced studies in heavy-flavour physics and for future work in an experimental PhD environment.

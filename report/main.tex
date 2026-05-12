@@ -1,0 +1,81 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.4cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+
+\graphicspath{{figures/}}
+
+\sisetup{
+  separate-uncertainty=true,
+  per-mode=symbol
+}
+
+\newcommand{\Bplus}{\ensuremath{B^+}}
+\newcommand{\Bminus}{\ensuremath{B^-}}
+\newcommand{\ACP}{\ensuremath{A_{\mathrm{CP}}}}
+\newcommand{\mevcc}{\ensuremath{\mathrm{MeV}/c^2}}
+\newcommand{\gevfour}{\ensuremath{\mathrm{GeV}^2/c^4}}
+
+\title{\textbf{A CERN Open Data Analysis of Three-Body B-Meson Decays}\\
+\large Invariant-Mass Reconstruction, Signal Classification, CP-Asymmetry Diagnostics, and Dalitz-Plot Studies}
+\author{Yanis Idir\\
+\small Portfolio report for experimental particle-physics PhD applications}
+\date{\today}
+
+\begin{document}
+\pagenumbering{gobble}
+
+\begin{titlepage}
+  \centering
+  \vspace*{2.0cm}
+  {\Large \textsc{LHCb Open Data Analysis}\par}
+  \vspace{1.2cm}
+  {\huge\bfseries A CERN Open Data Analysis of Three-Body B-Meson Decays\par}
+  \vspace{0.5cm}
+  {\Large Invariant-Mass Reconstruction, Signal Classification, CP-Asymmetry Diagnostics, and Dalitz-Plot Studies\par}
+  \vspace{1.8cm}
+  {\large Yanis Idir\par}
+  \vspace{0.2cm}
+  {\small Portfolio report for experimental particle-physics PhD applications\par}
+  \vfill
+  \begin{abstract}
+  This report presents a compact but realistic high-energy-physics analysis workflow based on LHCb CERN Open Data. Three-body B-meson candidates are reconstructed from charged-hadron tracks under a kaon mass hypothesis. The workflow uses ROOT input files, Python-based columnar data processing, invariant-mass reconstruction, event selection, a sideband-labelled Random Forest classifier, a raw charge-asymmetry diagnostic, and Dalitz-plot visualisations. The report emphasizes reproducibility, modular scientific code, and analysis reasoning suitable for an early-stage experimental particle-physics project.
+  \end{abstract}
+  \vfill
+  {\large \today\par}
+\end{titlepage}
+
+\clearpage
+\pagenumbering{roman}
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\input{sections/01_introduction}
+\input{sections/02_lhcb_experiment}
+\input{sections/03_dataset_software}
+\input{sections/04_invariant_mass}
+\input{sections/05_event_selection}
+\input{sections/06_signal_background}
+\input{sections/07_cp_asymmetry}
+\input{sections/08_dalitz}
+\input{sections/09_conclusion}
+
+\newpage
+\bibliographystyle{unsrt}
+\bibliography{bibliography}
+
+\end{document}

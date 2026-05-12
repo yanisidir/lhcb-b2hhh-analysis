@@ -1,0 +1,19 @@
+\section{Event Selection}
+
+Event selection is a central part of any hadron-collider analysis. The raw candidate sample contains true signal decays, partially reconstructed backgrounds, misidentified backgrounds, and random combinations of charged tracks. The goal of the baseline selection is to retain a useful signal-rich region while keeping the cuts simple enough to interpret.
+
+The baseline selection used in this project is
+\begin{align}
+  \chi^2_{\mathrm{vertex}}(B) &< 5, \\
+  d_{\mathrm{flight}}(B) &> 20, \\
+  P_K(H_1), P_K(H_2), P_K(H_3) &> 0.5 .
+\end{align}
+Here $\chi^2_{\mathrm{vertex}}(B)$ denotes the B-candidate vertex-quality variable, $d_{\mathrm{flight}}(B)$ denotes the reconstructed flight-distance variable, and $P_K(H_i)$ denotes the kaon PID response for daughter track $H_i$.
+
+The vertex-quality cut suppresses candidates whose three tracks do not form a well-reconstructed secondary vertex. This is physically motivated because the daughters of a true B decay should originate from a common decay point. A poor vertex fit is more likely to arise from accidental combinations of tracks produced in different processes or from poorly reconstructed tracks.
+
+The flight-distance selection exploits the finite lifetime of B mesons. Because B hadrons travel a measurable distance before decaying, their decay vertices are displaced from the primary proton--proton interaction point. Requiring a sufficiently large flight distance therefore suppresses prompt background combinations that originate near the primary vertex.
+
+The PID selection implements the kaon mass hypothesis used in the invariant-mass reconstruction. Requiring all three tracks to have kaon-compatible PID values improves the consistency of the reconstructed final state. In a more complete analysis, one would optimize PID requirements with calibration samples and evaluate the corresponding efficiency and misidentification rates. Here the selection is chosen as a transparent demonstration of how detector-level PID information enters the analysis.
+
+The selected sample is used consistently across the mass reconstruction, signal/background classification, CP-asymmetry diagnostic, and Dalitz-plot studies. This consistency is important: changing the selection between notebooks would make comparisons ambiguous and could introduce artificial differences in the resulting distributions.

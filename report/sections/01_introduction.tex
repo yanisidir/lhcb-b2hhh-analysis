@@ -1,0 +1,18 @@
+\section{Introduction}
+
+The Standard Model of particle physics describes the known elementary particles and their interactions with remarkable precision. Nevertheless, several observed features of the Universe remain only partially understood. One of the most important is the matter--antimatter asymmetry: cosmological observations indicate that the visible Universe is dominated by matter, while the known laws of particle physics contain only limited sources of charge-parity (CP) violation. Precision studies of flavour-changing processes are therefore a central part of modern particle physics.
+
+Flavour physics studies transitions between different quark flavours. In the heavy-flavour sector, hadrons containing beauty quarks provide especially rich laboratories. The large mass of the beauty quark allows many decay modes, including multibody final states in which resonant and non-resonant amplitudes can interfere. Such interference can generate local CP-asymmetric effects in restricted regions of phase space, even when the integrated asymmetry is small.
+
+B mesons are bound states containing a beauty quark or antiquark and a lighter valence quark. Charged B mesons, denoted \Bplus{} and \Bminus{}, form a natural pair of charge-conjugate systems. By comparing the observed yields or distributions of \Bplus{} and \Bminus{} candidates, one can construct raw asymmetry observables. In a simplified counting analysis, the integrated asymmetry is written as
+\begin{equation}
+  \ACP^{\mathrm{raw}} =
+  \frac{N(\Bminus) - N(\Bplus)}
+       {N(\Bminus) + N(\Bplus)} ,
+  \label{eq:acp_intro}
+\end{equation}
+where $N(\Bplus)$ and $N(\Bminus)$ are observed candidate counts. A full physics measurement must correct this raw quantity for background contributions, detector-induced charge asymmetries, production asymmetries, trigger effects, and selection efficiencies. The present project treats Eq.~\ref{eq:acp_intro} as an analysis diagnostic rather than as a final CP-violation measurement.
+
+This report documents a reproducible analysis workflow built with CERN Open Data~\cite{cernopendata}. The project focuses on a sample of reconstructed LHCb three-hadron B candidates stored in ROOT files. The analysis reconstructs the B-candidate invariant mass, applies simple physics-motivated selections, fits the mass peak, trains a signal/background classifier using sideband labels, separates charge-conjugate candidates, and produces Dalitz-plot distributions. The goal is to demonstrate a modern high-energy-physics (HEP) workflow using transparent scientific reasoning and modular Python code.
+
+The analysis is intentionally compact. It is not presented as a publishable LHCb measurement, but as a polished student-level project that mirrors the structure of a real experimental analysis: data access, reconstruction, selection, modelling, validation plots, and interpretation of limitations. This makes it suitable as a technical portfolio project for applications in experimental particle physics.

@@ -1,0 +1,46 @@
+\section{Signal and Background Classification}
+
+\subsection{Sideband-labelled samples}
+
+The signal/background study uses mass windows to create approximate labels. Candidates in a narrow window around the B mass are labelled as signal-like, while candidates in lower and upper mass sidebands are labelled as background-like. The sideband method is common in HEP because sideband regions provide a data-driven representation of combinatorial background.
+
+The label definition used in the notebook is
+\begin{align}
+  \mathrm{signal:} \qquad & 5270 < m_B < 5290~\mevcc, \\
+  \mathrm{background:} \qquad & 5200 < m_B < 5250~\mevcc \quad \mathrm{or} \quad
+  5310 < m_B < 5350~\mevcc .
+\end{align}
+These labels are proxy labels. The signal window can still contain background, and the sidebands may not perfectly represent the background under the signal peak. Nevertheless, the construction is useful for demonstrating a realistic machine-learning workflow without relying on simulation truth information.
+
+\subsection{Random Forest classifier}
+
+A Random Forest classifier is trained using reconstruction-quality and PID variables. The B-candidate mass is deliberately excluded from the feature list, because the mass defines the labels. Including it would make the classifier learn the sideband construction rather than physically meaningful differences in candidate quality or PID response.
+
+The classifier uses the following feature set:
+\begin{equation}
+  \left\{
+  \chi^2_{\mathrm{vertex}}(B),\,
+  d_{\mathrm{flight}}(B),\,
+  P_K(H_1), P_K(H_2), P_K(H_3),\,
+  P_{\pi}(H_1), P_{\pi}(H_2), P_{\pi}(H_3)
+  \right\}.
+\end{equation}
+The trained model is evaluated on a held-out test sample. The receiver operating characteristic (ROC) curve in Fig.~\ref{fig:roc} shows the trade-off between signal efficiency and background misclassification rate. The diagonal line corresponds to a classifier with no discriminating power.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{roc_signal_background.png}
+  \caption{ROC curve for the sideband-labelled Random Forest signal/background classifier.}
+  \label{fig:roc}
+\end{figure}
+
+Figure~\ref{fig:feature_importance} shows the feature-importance ranking from the Random Forest model. Such rankings are useful diagnostics, but they should not be overinterpreted as direct physics observables. They depend on feature correlations, sample composition, and the chosen model architecture.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{feature_importance_signal_background.png}
+  \caption{Random Forest feature importance for the signal/background classification task.}
+  \label{fig:feature_importance}
+\end{figure}
+
+This part of the project demonstrates the integration of standard HEP sideband logic with modern machine-learning tools. Future improvements could include gradient-boosted decision trees, cross-validation, systematic studies of the sideband definition, and comparisons with simulation.

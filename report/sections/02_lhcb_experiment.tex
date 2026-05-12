@@ -1,0 +1,11 @@
+\section{The LHCb Experiment}
+
+The Large Hadron Collider beauty experiment (LHCb) is a forward spectrometer at the CERN Large Hadron Collider designed for precision studies of hadrons containing beauty and charm quarks~\cite{lhcbdetector}. Proton--proton collisions at the LHC produce heavy quarks predominantly in the forward and backward regions. LHCb exploits this production topology by covering a forward angular region, providing excellent tracking, vertexing, momentum resolution, and particle identification.
+
+The detector design is particularly well suited to heavy-flavour analyses. B hadrons have lifetimes long enough to travel measurable distances before decaying. This displaced-decay topology is identified by reconstructing primary vertices from the proton--proton interaction and secondary vertices from the B-hadron decay products. The distance between these vertices and the quality of the reconstructed secondary vertex are powerful handles for suppressing prompt combinatorial background.
+
+Charged-particle tracking is performed with a system of silicon and tracking stations around a dipole magnet. The curvature of charged-particle trajectories in the magnetic field provides a momentum measurement and determines the charge sign. In the present analysis, the track momentum components are used directly to build four-vectors for the three daughter hadrons. The charge information is used later to classify candidates as \Bplus{} or \Bminus{}.
+
+Particle identification (PID) is another central ingredient. LHCb uses ring-imaging Cherenkov detectors to distinguish kaons, pions, and protons over a broad momentum range. The open-data ntuples used in this project contain per-track PID-related variables such as kaon and pion probability-like observables. A simple kaon-PID selection is applied to build a clean demonstration sample under a $B \to K K K$ mass hypothesis.
+
+In a complete LHCb analysis, detector effects are modelled with simulation, calibration samples, and data-driven corrections. This project keeps the detector treatment deliberately simple, but it preserves the main conceptual ingredients: displaced B vertices, charged-track reconstruction, particle identification, and magnet-polarity awareness.
