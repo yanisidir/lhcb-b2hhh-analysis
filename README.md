@@ -187,6 +187,90 @@ Recommended notebook order:
 
 Figures are saved automatically in `figures/`.
 
+### First Nominal Mass Fit
+
+The reusable fitting infrastructure lives in `src/fitting/`. To run the first
+nominal binned invariant-mass fit of the selected B-candidate spectrum:
+
+```bash
+python scripts/run_mass_fit.py
+```
+
+The script reuses the shared loading, reconstruction, and baseline-selection
+helpers from `src.physics.selection`, then writes:
+
+- `results/fits/mass_fit_results.json`
+- `results/fits/mass_fit_plot.png`
+
+The default nominal signal model is now a common-mean double Gaussian with a
+finite-range exponential background. This is still a first nominal mass fit,
+not yet a full systematic study with alternative shapes, fit ranges, or
+charge-separated yield corrections.
+
+### Charge-Separated Raw Asymmetry
+
+To fit the B+ and B- candidate mass spectra separately and compute the raw
+fitted-yield asymmetry:
+
+```bash
+python scripts/run_charge_separated_fits.py
+```
+
+Outputs are saved in `results/fits/charge_separated/`, including the two
+charge-specific fit JSON files, fit plots, and `raw_asymmetry.json`.
+
+This is a raw asymmetry only. It is not corrected for detector-induced charge
+asymmetry, B production asymmetry, trigger or reconstruction effects, or
+selection-induced charge biases.
+
+### Toy-MC Raw-Asymmetry Validation
+
+To validate the charge-separated fit and raw-asymmetry extraction on pseudo-data
+generated from the nominal fitted model:
+
+```bash
+python studies/toy_mc/run_raw_asymmetry_toys.py
+```
+
+The study writes per-toy results, a JSON summary, and diagnostic plots to
+`results/toy_mc/raw_asymmetry/`. This checks whether the statistical fitting
+machinery recovers injected yields and raw asymmetry on nominal toys; it is not
+a detector-level systematic study.
+
+A 10-toy run is only a technical smoke test. Use at least 100 toys for a
+meaningful first validation, and prefer 500 or more toys when quoting stable
+pull-width estimates.
+
+### Fit-Model Systematics
+
+To compare charge-separated raw-asymmetry fits across implemented fit-model
+variations:
+
+```bash
+python studies/systematics/run_fit_model_variations.py
+```
+
+A model variation is only used as a systematic uncertainty if it provides an
+acceptable description of both charge-separated mass spectra. Stress-test
+models are kept in the results table, but rejected models are not included in
+the recommended model systematic. The first accepted background-shape
+alternative compares the nominal double-Gaussian plus exponential model with a
+double-Gaussian plus finite-range linear background.
+
+### Local Dalitz Raw-Asymmetry Diagnostic
+
+To compute a bin-by-bin raw asymmetry over the selected-candidate Dalitz plane:
+
+```bash
+python studies/dalitz/run_local_raw_asymmetry.py
+```
+
+Outputs are saved in `results/dalitz/local_asymmetry/`, including the per-bin
+CSV table, a JSON summary, and maps of local raw asymmetry, local significance,
+and selected-candidate counts. This is a raw local asymmetry diagnostic only. It
+is not corrected for detector efficiency, background contamination, production
+asymmetry, migration across Dalitz bins, or phase-space acceptance.
+
 ## Notes for GitHub
 
 ROOT files and processed data products are ignored by Git to keep the repository lightweight. The README references figures in `figures/`, so keep representative output plots tracked when preparing the public repository.

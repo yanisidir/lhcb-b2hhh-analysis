@@ -49,18 +49,19 @@ After applying quality, displacement, and kaon-PID selections, the mass spectrum
 
 \subsection{Signal-plus-background fit}
 
-A first signal extraction is performed with a simple Gaussian signal model plus a linear background model:
+A nominal signal extraction is performed with an extended signal-plus-background mass model,
 \begin{equation}
   f(m) =
-  A \exp\left[-\frac{(m-\mu)^2}{2\sigma^2}\right]
-  + a m + b .
+  N_s S(m) + N_b B(m) .
   \label{eq:mass_fit_model}
 \end{equation}
-This model is not intended to replace a full analysis fit, but it provides a useful validation of the reconstructed peak position and width. The fitted distribution is shown in Fig.~\ref{fig:mass_fit}. The visible peak near the B-meson mass demonstrates that the four-vector reconstruction and event selection are behaving sensibly.
+Here $S(m)$ is a common-mean double-Gaussian signal model for the reconstructed B-candidate peak, $B(m)$ is a finite-range exponential background model for the combinatorial component, and $N_s$ and $N_b$ are the fitted signal and background yields in the fitted mass interval. This model is used as the nominal mass-fit configuration later for the charge-separated \Bplus{} and \Bminus{} fits. Alternative background descriptions are studied as systematic variations in the raw-asymmetry analysis, so the fit shown here should be interpreted as a nominal modelling choice rather than as a final physics measurement.
+
+The fitted distribution is shown in Fig.~\ref{fig:mass_fit}. The visible peak near the B-meson mass demonstrates that the four-vector reconstruction and event selection are behaving sensibly, while the fitted background component provides a compact description of the residual combinatorial contribution.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\textwidth]{B_mass_fit.png}
-  \caption{Selected B-candidate mass spectrum fitted with a Gaussian signal component and linear background component.}
+  \includegraphics[width=0.82\textwidth]{mass_fit_plot.png}
+  \caption{Selected B-candidate mass spectrum fitted with a double-Gaussian signal component and finite-range exponential background component.}
   \label{fig:mass_fit}
 \end{figure}

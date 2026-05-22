@@ -2,6 +2,7 @@ numpy
 pandas
 matplotlib
 scipy
+iminuit
 scikit-learn
 jupyterlab
 ipykernel
