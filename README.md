@@ -49,6 +49,8 @@ additionally require.
 | Selection | Vertex quality, flight distance, kaon PID; shared by every study | [`src/physics/selection.py`](src/physics/selection.py) |
 | Mass models | Gaussian / double-Gaussian signal, finite-range exponential and linear backgrounds | [`src/fitting/mass_models.py`](src/fitting/mass_models.py) |
 | Fitting | Binned extended maximum-likelihood fit, pulls, fit-quality metrics | [`src/fitting/fit_mass.py`](src/fitting/fit_mass.py) |
+| Asymmetry | Raw asymmetry from fitted yields, with error propagation | [`src/fitting/asymmetry.py`](src/fitting/asymmetry.py) |
+| Acceptance | Criteria a variation must meet to define a systematic | [`src/fitting/acceptance.py`](src/fitting/acceptance.py) |
 | Dalitz kinematics | Pairwise invariant-mass-squared variables | [`src/physics/dalitz.py`](src/physics/dalitz.py) |
 | Classification | Sideband-labelled Random Forest | [`src/ml/signal_background.py`](src/ml/signal_background.py) |
 
@@ -150,6 +152,14 @@ so every number quoted above can be checked against the file that produced it.
 The exploratory notebooks (`notebooks/01`, `03`, `04`, `05`) run in the same
 environment via `jupyter lab` and write their figures to `figures/`.
 
+The reconstruction, selection, mass models and asymmetry propagation are covered
+by unit tests, including a closure test that fits pseudo-data generated from
+known parameters and checks that the fit recovers them:
+
+```bash
+pytest tests/
+```
+
 ## Repository layout
 
 ```text
@@ -157,13 +167,15 @@ lhcb-b2hhh-analysis/
 ├── src/                    # reusable analysis code
 │   ├── reconstruction/     # invariant-mass reconstruction
 │   ├── physics/            # baseline selection, Dalitz kinematics
-│   ├── fitting/            # mass models and the binned likelihood fit
+│   ├── fitting/            # mass models, likelihood fit, asymmetry, acceptance
 │   ├── ml/                 # sideband-labelled classifier
-│   └── plotting/           # figure helpers
+│   ├── plotting/           # figure helpers
+│   └── utils/              # project paths and JSON output
 ├── scripts/                # nominal and charge-separated fits
 ├── studies/                # toy MC, systematics, local Dalitz asymmetry
 ├── notebooks/              # exploratory analysis, kept with outputs
 ├── results/                # JSON/CSV summaries (figures regenerated locally)
+├── tests/                  # unit tests of the reconstruction, models and fit
 ├── figures/                # analysis figures
 ├── report/                 # LaTeX report (main.pdf)
 ├── slides/                 # Beamer presentation (main.pdf)

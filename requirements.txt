@@ -13,3 +13,6 @@ iminuit>=2.25
 # Notebook environment.
 jupyterlab==4.5.7
 ipykernel==6.31.0
+
+# Tests.
+pytest>=8.0
