@@ -6,22 +6,18 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 
 import numpy as np
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-for path in (PROJECT_ROOT, SCRIPTS_DIR):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from run_mass_fit import _display_path, _json_safe
-from src.plotting.mass_plots import set_hep_style
+from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
+from src.utils.io import display_path, json_safe, write_json
 
 
 DEFAULT_RAW_ASYMMETRY_PATH = (
@@ -97,9 +93,9 @@ def build_summary(raw_asymmetry, fit_model_summary, fit_range_summary):
             total_systematic_uncertainty,
         ),
         "inputs": {
-            "raw_asymmetry": str(_display_path(DEFAULT_RAW_ASYMMETRY_PATH)),
-            "fit_model_summary": str(_display_path(DEFAULT_FIT_MODEL_SUMMARY_PATH)),
-            "fit_range_summary": str(_display_path(DEFAULT_FIT_RANGE_SUMMARY_PATH)),
+            "raw_asymmetry": str(display_path(DEFAULT_RAW_ASYMMETRY_PATH)),
+            "fit_model_summary": str(display_path(DEFAULT_FIT_MODEL_SUMMARY_PATH)),
+            "fit_range_summary": str(display_path(DEFAULT_FIT_RANGE_SUMMARY_PATH)),
         },
         "notes": (
             "Total systematic and total uncertainties are computed by adding "
@@ -127,18 +123,8 @@ def write_summary_csv(summary, output_path: Path):
         writer.writerows(rows)
 
 
-def _configure_matplotlib_cache():
-    cache_root = Path(tempfile.gettempdir()) / "lhcb-b2hhh-analysis"
-    matplotlib_cache = cache_root / "matplotlib"
-    xdg_cache = cache_root / "xdg-cache"
-    matplotlib_cache.mkdir(parents=True, exist_ok=True)
-    xdg_cache.mkdir(parents=True, exist_ok=True)
-    os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_cache))
-    os.environ.setdefault("XDG_CACHE_HOME", str(xdg_cache))
-
-
 def write_breakdown_plot(summary, output_path: Path):
-    _configure_matplotlib_cache()
+    configure_matplotlib_cache()
     import matplotlib
 
     matplotlib.use("Agg")
@@ -222,9 +208,9 @@ def main():
 
     summary = build_summary(raw_asymmetry, fit_model_summary, fit_range_summary)
     summary["inputs"] = {
-        "raw_asymmetry": str(_display_path(raw_asymmetry_path)),
-        "fit_model_summary": str(_display_path(fit_model_summary_path)),
-        "fit_range_summary": str(_display_path(fit_range_summary_path)),
+        "raw_asymmetry": str(display_path(raw_asymmetry_path)),
+        "fit_model_summary": str(display_path(fit_model_summary_path)),
+        "fit_range_summary": str(display_path(fit_range_summary_path)),
     }
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -232,15 +218,15 @@ def main():
     csv_path = output_dir / "systematic_summary.csv"
     plot_path = output_dir / "systematic_breakdown.png"
 
-    json_path.write_text(json.dumps(_json_safe(summary), indent=2) + "\n", encoding="utf-8")
+    write_json(json_path, summary)
     write_summary_csv(summary, csv_path)
     write_breakdown_plot(summary, plot_path)
 
     print(summary["report_text"])
     print(f"Total uncertainty: {summary['total_uncertainty']:.5f}")
-    print(f"Wrote {_display_path(json_path)}")
-    print(f"Wrote {_display_path(csv_path)}")
-    print(f"Wrote {_display_path(plot_path)}")
+    print(f"Wrote {display_path(json_path)}")
+    print(f"Wrote {display_path(csv_path)}")
+    print(f"Wrote {display_path(plot_path)}")
 
 
 if __name__ == "__main__":

@@ -6,25 +6,22 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 
 import numpy as np
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-for path in (PROJECT_ROOT, SCRIPTS_DIR):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from run_charge_separated_fits import _raw_asymmetry, _signal_yield_uncertainty
-from run_mass_fit import DEFAULT_DATA_PATH, _display_path, _json_safe
+from src.fitting.acceptance import fit_quality_acceptance, status_summary
+from src.fitting.asymmetry import raw_asymmetry
 from src.fitting.fit_mass import fit_mass_distribution
 from src.physics.selection import prepare_selected_candidates
-from src.plotting.mass_plots import set_hep_style
+from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
+from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "systematics"
@@ -78,26 +75,6 @@ MODEL_VARIATIONS = [
 ]
 
 
-def _configure_matplotlib_cache():
-    cache_root = Path(tempfile.gettempdir()) / "lhcb-b2hhh-analysis"
-    matplotlib_cache = cache_root / "matplotlib"
-    xdg_cache = cache_root / "xdg-cache"
-    matplotlib_cache.mkdir(parents=True, exist_ok=True)
-    xdg_cache.mkdir(parents=True, exist_ok=True)
-    os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_cache))
-    os.environ.setdefault("XDG_CACHE_HOME", str(xdg_cache))
-
-
-def _status_summary(fit_result):
-    status = fit_result.get("fit_status", {})
-    return {
-        "success": bool(status.get("success")),
-        "valid": bool(status.get("valid")),
-        "backend": status.get("backend"),
-        "message": status.get("message"),
-    }
-
-
 def _fit_charge_sample(
     masses,
     fit_range,
@@ -114,34 +91,6 @@ def _fit_charge_sample(
     )
 
 
-def _positive(value) -> bool:
-    return value is not None and np.isfinite(value) and value > 0.0
-
-
-def _fit_quality_acceptance(row, max_chi2_ndof: float):
-    reasons = []
-    if not row["fit_success_plus"] or not row["fit_valid_plus"]:
-        reasons.append("B+ fit did not converge")
-    if not row["fit_success_minus"] or not row["fit_valid_minus"]:
-        reasons.append("B- fit did not converge")
-    if row["chi2_ndof_plus"] is None or row["chi2_ndof_plus"] >= max_chi2_ndof:
-        reasons.append(f"B+ chi2/ndof >= {max_chi2_ndof:g}")
-    if row["chi2_ndof_minus"] is None or row["chi2_ndof_minus"] >= max_chi2_ndof:
-        reasons.append(f"B- chi2/ndof >= {max_chi2_ndof:g}")
-    if not _positive(row["N_plus"]):
-        reasons.append("B+ fitted yield is not positive")
-    if not _positive(row["N_minus"]):
-        reasons.append("B- fitted yield is not positive")
-    if not _positive(row["sigma_N_plus"]):
-        reasons.append("B+ fitted yield uncertainty is not positive")
-    if not _positive(row["sigma_N_minus"]):
-        reasons.append("B- fitted yield uncertainty is not positive")
-    if row["variation_role"] == "stress_test":
-        reasons.append("stress-test model, not accepted for systematic assignment")
-
-    return len(reasons) == 0, "; ".join(reasons) if reasons else ""
-
-
 def _variation_row(
     variation,
     plus_result,
@@ -150,14 +99,14 @@ def _variation_row(
     n_minus_candidates: int,
     max_chi2_ndof: float,
 ):
-    asymmetry = _raw_asymmetry(
+    asymmetry = raw_asymmetry(
         plus_result,
         minus_result,
         n_plus_candidates=n_plus_candidates,
         n_minus_candidates=n_minus_candidates,
     )
-    plus_status = _status_summary(plus_result)
-    minus_status = _status_summary(minus_result)
+    plus_status = status_summary(plus_result)
+    minus_status = status_summary(minus_result)
     row = {
         "model_name": variation["model_name"],
         "signal_model": variation["signal_model"],
@@ -181,7 +130,7 @@ def _variation_row(
         "fit_status_plus": plus_status["message"],
         "fit_status_minus": minus_status["message"],
     }
-    accepted, rejection_reason = _fit_quality_acceptance(row, max_chi2_ndof)
+    accepted, rejection_reason = fit_quality_acceptance(row, max_chi2_ndof)
     row["accepted_for_systematic"] = accepted
     row["rejection_reason"] = rejection_reason
     return row
@@ -244,7 +193,7 @@ def write_csv(rows, output_path: Path):
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(_json_safe(row) for row in rows)
+        writer.writerows(json_safe(row) for row in rows)
 
 
 def _summary_entry(row, nominal_a_raw):
@@ -355,7 +304,7 @@ def summarize_variations(rows, fit_range, bins: int, max_chi2_ndof: float):
 
 
 def write_variation_plot(rows, output_path: Path):
-    _configure_matplotlib_cache()
+    configure_matplotlib_cache()
     import matplotlib
 
     matplotlib.use("Agg")
@@ -469,7 +418,7 @@ def main():
     summary_path = output_dir / "fit_model_summary.json"
     plot_path = output_dir / "fit_model_variations.png"
     write_csv(rows, csv_path)
-    summary_path.write_text(json.dumps(_json_safe(summary), indent=2) + "\n", encoding="utf-8")
+    summary_path.write_text(json.dumps(json_safe(summary), indent=2) + "\n", encoding="utf-8")
     write_variation_plot(rows, plot_path)
 
     recommended = summary["recommended_model_systematic"]
@@ -477,9 +426,9 @@ def main():
         print("Recommended model systematic: pending additional accepted model variations")
     else:
         print(f"Recommended model systematic: {recommended:.6f}")
-    print(f"Wrote {_display_path(csv_path)}")
-    print(f"Wrote {_display_path(summary_path)}")
-    print(f"Wrote {_display_path(plot_path)}")
+    print(f"Wrote {display_path(csv_path)}")
+    print(f"Wrote {display_path(summary_path)}")
+    print(f"Wrote {display_path(plot_path)}")
 
 
 if __name__ == "__main__":

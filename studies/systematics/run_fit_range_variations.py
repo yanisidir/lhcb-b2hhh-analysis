@@ -13,21 +13,15 @@ import numpy as np
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-for path in (PROJECT_ROOT, SCRIPTS_DIR):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from run_charge_separated_fits import _raw_asymmetry, _signal_yield_uncertainty
-from run_mass_fit import DEFAULT_DATA_PATH, _display_path, _json_safe
-from run_fit_model_variations import (
-    _configure_matplotlib_cache,
-    _fit_quality_acceptance,
-    _status_summary,
-)
+from src.fitting.acceptance import fit_quality_acceptance, status_summary
+from src.fitting.asymmetry import raw_asymmetry
 from src.fitting.fit_mass import fit_mass_distribution
 from src.physics.selection import prepare_selected_candidates
-from src.plotting.mass_plots import set_hep_style
+from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
+from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "systematics"
@@ -110,7 +104,7 @@ def _raw_asymmetry_safe(plus_result, minus_result, n_plus_candidates: int, n_min
             "n_candidates_plus": int(n_plus_candidates),
             "n_candidates_minus": int(n_minus_candidates),
         }
-    return _raw_asymmetry(
+    return raw_asymmetry(
         plus_result,
         minus_result,
         n_plus_candidates=n_plus_candidates,
@@ -137,8 +131,8 @@ def _variation_row(
         n_plus_candidates=n_plus_candidates,
         n_minus_candidates=n_minus_candidates,
     )
-    plus_status = _status_summary(plus_result)
-    minus_status = _status_summary(minus_result)
+    plus_status = status_summary(plus_result)
+    minus_status = status_summary(minus_result)
     row = {
         "range_name": variation["range_name"],
         "fit_range_low": low,
@@ -168,7 +162,7 @@ def _variation_row(
         "fit_status_plus": plus_status["message"],
         "fit_status_minus": minus_status["message"],
     }
-    accepted, rejection_reason = _fit_quality_acceptance(row, max_chi2_ndof)
+    accepted, rejection_reason = fit_quality_acceptance(row, max_chi2_ndof)
     row["accepted_for_systematic"] = accepted
     row["rejection_reason"] = rejection_reason
     return row
@@ -211,7 +205,7 @@ def write_csv(rows, output_path: Path):
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(_json_safe(row) for row in rows)
+        writer.writerows(json_safe(row) for row in rows)
 
 
 def _summary_entry(row, nominal_a_raw):
@@ -294,7 +288,7 @@ def summarize_variations(rows, bins: int, max_chi2_ndof: float):
 
 
 def write_variation_plot(rows, output_path: Path):
-    _configure_matplotlib_cache()
+    configure_matplotlib_cache()
     import matplotlib
 
     matplotlib.use("Agg")
@@ -384,7 +378,7 @@ def main():
     summary_path = output_dir / "fit_range_summary.json"
     plot_path = output_dir / "fit_range_variations.png"
     write_csv(rows, csv_path)
-    summary_path.write_text(json.dumps(_json_safe(summary), indent=2) + "\n", encoding="utf-8")
+    write_json(summary_path, summary)
     write_variation_plot(rows, plot_path)
 
     recommended = summary["recommended_fit_range_systematic"]
@@ -392,9 +386,9 @@ def main():
         print("Recommended fit-range systematic: pending accepted fit-range variations")
     else:
         print(f"Recommended fit-range systematic: {recommended:.6f}")
-    print(f"Wrote {_display_path(csv_path)}")
-    print(f"Wrote {_display_path(summary_path)}")
-    print(f"Wrote {_display_path(plot_path)}")
+    print(f"Wrote {display_path(csv_path)}")
+    print(f"Wrote {display_path(summary_path)}")
+    print(f"Wrote {display_path(plot_path)}")
 
 
 if __name__ == "__main__":

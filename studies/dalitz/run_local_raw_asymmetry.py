@@ -5,24 +5,20 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 
 import numpy as np
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-for path in (PROJECT_ROOT, SCRIPTS_DIR):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from run_mass_fit import DEFAULT_DATA_PATH, _display_path, _json_safe
 from src.physics.dalitz import compute_dalitz_variables
 from src.physics.selection import prepare_selected_candidates
-from src.plotting.mass_plots import set_hep_style
+from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
+from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "dalitz" / "local_asymmetry"
@@ -34,16 +30,6 @@ CAVEAT = (
     "efficiency, background contamination, production asymmetry, migration across "
     "Dalitz bins, or phase-space acceptance."
 )
-
-
-def _configure_matplotlib_cache() -> None:
-    cache_root = Path(tempfile.gettempdir()) / "lhcb-b2hhh-analysis"
-    matplotlib_cache = cache_root / "matplotlib"
-    xdg_cache = cache_root / "xdg-cache"
-    matplotlib_cache.mkdir(parents=True, exist_ok=True)
-    xdg_cache.mkdir(parents=True, exist_ok=True)
-    os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_cache))
-    os.environ.setdefault("XDG_CACHE_HOME", str(xdg_cache))
 
 
 def _finite_range(values, requested_range: tuple[float, float] | None = None) -> tuple[float, float]:
@@ -231,7 +217,7 @@ def _plot_heatmap(
     vmin: float | None = None,
     vmax: float | None = None,
 ):
-    _configure_matplotlib_cache()
+    configure_matplotlib_cache()
     import matplotlib
 
     matplotlib.use("Agg")
@@ -334,7 +320,7 @@ def build_summary(
 
     return {
         "study": "local Dalitz-plane raw asymmetry",
-        "data_path": str(_display_path(data_path)),
+        "data_path": str(display_path(data_path)),
         "selection": "src.physics.selection.prepare_selected_candidates",
         "dalitz_variables": {
             "x": x_var,
@@ -467,10 +453,7 @@ def main():
         min_count=args.min_count,
         mass_window=mass_window,
     )
-    summary_path.write_text(
-        json.dumps(_json_safe(summary), indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json(summary_path, summary)
     write_plots(result, output_dir, args.x_var, args.y_var, args.min_count)
 
     print(f"Selected finite Dalitz candidates: {len(candidates):,}")
@@ -484,11 +467,11 @@ def main():
         "Bins passing min-count:          "
         f"{summary['n_bins_passing_min_count']} / {summary['n_bins_total']}"
     )
-    print(f"Wrote {_display_path(bins_path)}")
-    print(f"Wrote {_display_path(summary_path)}")
-    print(f"Wrote {_display_path(output_dir / 'local_A_raw_map.png')}")
-    print(f"Wrote {_display_path(output_dir / 'local_significance_map.png')}")
-    print(f"Wrote {_display_path(output_dir / 'local_counts_map.png')}")
+    print(f"Wrote {display_path(bins_path)}")
+    print(f"Wrote {display_path(summary_path)}")
+    print(f"Wrote {display_path(output_dir / 'local_A_raw_map.png')}")
+    print(f"Wrote {display_path(output_dir / 'local_significance_map.png')}")
+    print(f"Wrote {display_path(output_dir / 'local_counts_map.png')}")
 
 
 if __name__ == "__main__":

@@ -6,9 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
 import sys
-import tempfile
 import time
 from pathlib import Path
 
@@ -20,40 +18,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.fitting.fit_mass import fit_mass_distribution
-from src.plotting.mass_plots import set_hep_style
+from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
+from src.utils.io import display_path, json_safe, write_json
 
 
 DEFAULT_BASELINE_DIR = PROJECT_ROOT / "results" / "fits" / "charge_separated"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "toy_mc" / "raw_asymmetry"
-
-
-def _json_safe(value):
-    if isinstance(value, dict):
-        return {key: _json_safe(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [_json_safe(item) for item in value]
-    if isinstance(value, np.generic):
-        value = value.item()
-    if isinstance(value, float) and not np.isfinite(value):
-        return None
-    return value
-
-
-def _display_path(path: Path) -> Path:
-    try:
-        return path.relative_to(PROJECT_ROOT)
-    except ValueError:
-        return path
-
-
-def _configure_matplotlib_cache():
-    cache_root = Path(tempfile.gettempdir()) / "lhcb-b2hhh-analysis"
-    matplotlib_cache = cache_root / "matplotlib"
-    xdg_cache = cache_root / "xdg-cache"
-    matplotlib_cache.mkdir(parents=True, exist_ok=True)
-    xdg_cache.mkdir(parents=True, exist_ok=True)
-    os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_cache))
-    os.environ.setdefault("XDG_CACHE_HOME", str(xdg_cache))
 
 
 def _load_json(path: Path):
@@ -293,7 +263,7 @@ def write_toy_results(rows, output_path: Path):
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(_json_safe(row) for row in rows)
+        writer.writerows(json_safe(row) for row in rows)
 
 
 def _finite_array(rows, key: str, valid_only: bool = True):
@@ -349,7 +319,7 @@ def summarize_toys(rows, injected_a_raw: float, seed: int, baseline_dir: Path, f
         "fit_range": list(fit_range),
         "bins": int(bins),
         "random_seed": seed,
-        "baseline_dir": str(_display_path(baseline_dir)),
+        "baseline_dir": str(display_path(baseline_dir)),
         "note": (
             "Toy-MC validation generated from the nominal charge-separated mass model. "
             "This validates the statistical machinery only, not detector-level systematics."
@@ -366,7 +336,7 @@ def _histogram(ax, values, bins: int, title: str, xlabel: str, color: str):
 
 
 def write_plots(rows, output_dir: Path, injected_a_raw: float):
-    _configure_matplotlib_cache()
+    configure_matplotlib_cache()
     import matplotlib
 
     matplotlib.use("Agg")
@@ -487,10 +457,7 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     summary = summarize_toys(rows, injected_a_raw, args.seed, baseline_dir, fit_range, bins)
     write_toy_results(rows, output_dir / "toy_results.csv")
-    (output_dir / "toy_summary.json").write_text(
-        json.dumps(_json_safe(summary), indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json(output_dir / "toy_summary.json", summary)
     write_plots(rows, output_dir, injected_a_raw)
 
     valid_summary = summary["valid_toys"]
@@ -501,11 +468,11 @@ def main():
     print(f"Pull width:               {_format_optional(valid_summary['A_raw_pull_width'], precision=3)}")
     print(f"Fit failure rate:         {_format_optional(summary['fit_failure_rate'], precision=3)}")
     print(f"Valid toy rate:           {_format_optional(summary['valid_for_pull_studies_rate'], precision=3)}")
-    print(f"Wrote {_display_path(output_dir / 'toy_results.csv')}")
-    print(f"Wrote {_display_path(output_dir / 'toy_summary.json')}")
-    print(f"Wrote {_display_path(output_dir / 'A_raw_distribution.png')}")
-    print(f"Wrote {_display_path(output_dir / 'pull_A_raw_distribution.png')}")
-    print(f"Wrote {_display_path(output_dir / 'yield_pull_distributions.png')}")
+    print(f"Wrote {display_path(output_dir / 'toy_results.csv')}")
+    print(f"Wrote {display_path(output_dir / 'toy_summary.json')}")
+    print(f"Wrote {display_path(output_dir / 'A_raw_distribution.png')}")
+    print(f"Wrote {display_path(output_dir / 'pull_A_raw_distribution.png')}")
+    print(f"Wrote {display_path(output_dir / 'yield_pull_distributions.png')}")
 
 
 if __name__ == "__main__":

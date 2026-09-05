@@ -5,6 +5,25 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def configure_matplotlib_cache():
+    """Point matplotlib and fontconfig at a writable cache directory.
+
+    Scripts run in environments where the default cache location is read-only,
+    which makes matplotlib emit warnings on every import. Setting the cache
+    inside the project keeps script and notebook output clean.
+    """
+    import os
+    import tempfile
+
+    cache_root = Path(tempfile.gettempdir()) / "lhcb-b2hhh-analysis"
+    matplotlib_cache = cache_root / "matplotlib"
+    xdg_cache = cache_root / "xdg-cache"
+    matplotlib_cache.mkdir(parents=True, exist_ok=True)
+    xdg_cache.mkdir(parents=True, exist_ok=True)
+    os.environ.setdefault("MPLCONFIGDIR", str(matplotlib_cache))
+    os.environ.setdefault("XDG_CACHE_HOME", str(xdg_cache))
+
+
 def set_hep_style():
     """Apply a compact, readable matplotlib style for analysis figures."""
     import matplotlib.pyplot as plt
