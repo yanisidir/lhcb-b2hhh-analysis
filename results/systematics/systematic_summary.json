@@ -1,0 +1,15 @@
+{
+  "nominal_A_raw": -0.04075938417812977,
+  "statistical_uncertainty": 0.02804692856739971,
+  "fit_model_systematic": 0.025468096142614485,
+  "fit_range_systematic": 0.03504397479242409,
+  "total_systematic_uncertainty": 0.0433209428611787,
+  "total_uncertainty": 0.05160750228839148,
+  "report_text": "A_raw = -0.04076 +/- 0.02805 (stat.) +/- 0.04332 (syst.)",
+  "inputs": {
+    "raw_asymmetry": "results/fits/charge_separated/raw_asymmetry.json",
+    "fit_model_summary": "results/systematics/fit_model_summary.json",
+    "fit_range_summary": "results/systematics/fit_range_summary.json"
+  },
+  "notes": "Total systematic and total uncertainties are computed by adding independent uncertainty components in quadrature. The quoted asymmetry is raw and is not corrected for detector, production, trigger, reconstruction, or selection-induced charge asymmetries."
+}

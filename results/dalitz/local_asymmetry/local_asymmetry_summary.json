@@ -1,0 +1,50 @@
+{
+  "study": "local Dalitz-plane raw asymmetry",
+  "data_path": "data/raw/B2HHH_MagnetDown.root",
+  "selection": "src.physics.selection.prepare_selected_candidates",
+  "dalitz_variables": {
+    "x": "m_K1K2_sq",
+    "y": "m_K2K3_sq",
+    "source": "src.physics.dalitz.compute_dalitz_variables"
+  },
+  "charge_definition": "total_charge = H1_Charge + H2_Charge + H3_Charge",
+  "bins_x": 10,
+  "bins_y": 10,
+  "min_count": 20,
+  "x_edges": [
+    0.9764254744749069,
+    3.1663362129273414,
+    5.356246951379776,
+    7.546157689832211,
+    9.736068428284645,
+    11.92597916673708,
+    14.115889905189514,
+    16.30580064364195,
+    18.495711382094385,
+    20.685622120546817,
+    22.875532858999254
+  ],
+  "y_edges": [
+    1.0762872378520965,
+    3.9843450612792015,
+    6.892402884706307,
+    9.80046070813341,
+    12.708518531560516,
+    15.616576354987622,
+    18.524634178414725,
+    21.432692001841833,
+    24.340749825268936,
+    27.24880764869604,
+    30.156865472123147
+  ],
+  "n_candidates": 1645,
+  "n_candidates_plus": 884,
+  "n_candidates_minus": 761,
+  "global_counting_A_raw": -0.07477203647416414,
+  "global_counting_sigma_A_raw": 0.024586663824750825,
+  "n_bins_total": 100,
+  "n_bins_passing_min_count": 26,
+  "n_bins_masked_low_count": 74,
+  "max_abs_significance_passing_bins": 3.517811819867572,
+  "caveat": "Raw local asymmetry diagnostic only; no corrections are applied for detector efficiency, background contamination, production asymmetry, migration across Dalitz bins, or phase-space acceptance."
+}

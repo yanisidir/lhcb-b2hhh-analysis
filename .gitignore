@@ -30,6 +30,7 @@ data/processed/
 *.hdf5
 
 # Temporary outputs
+.cache/
 tmp/
 temp/
 scratch/
@@ -48,11 +49,13 @@ reports/tmp/
 *.synctex.gz
 *.toc
 
-# Generated analysis outputs
-results/
+# Generated analysis outputs. The small JSON/CSV summaries are tracked so the
+# numbers quoted in the report can be checked without rerunning the analysis;
+# the regenerated PNGs are not (the report keeps its own copies).
+results/**
+!results/**/
+!results/**/*.json
+!results/**/*.csv
 
 # Optional notebook outputs
 *.nbconvert.ipynb
-
-# Mac
-.DS_Store

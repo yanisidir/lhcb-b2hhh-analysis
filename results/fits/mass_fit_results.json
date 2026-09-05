@@ -1,0 +1,49 @@
+{
+  "signal_yield": 1377.8375284260458,
+  "background_yield": 243.2207810518201,
+  "mass_mean": 5284.355359669151,
+  "background_slope": -0.004453587693626785,
+  "mass_resolution": 20.141463343488176,
+  "mass_resolution_narrow": 3.7054608432435474,
+  "mass_resolution_wide": 20.239506352437886,
+  "signal_fraction": 0.01,
+  "signal_model": "double_gaussian",
+  "parameter_uncertainties": {
+    "signal_yield": 38.38209633586557,
+    "background_yield": 16.799790133357856,
+    "mass_mean": 0.582690519351393,
+    "mass_resolution_narrow": 0.0,
+    "mass_resolution_wide": 0.5421432319346052,
+    "signal_fraction": 0.012466398224031845,
+    "background_slope": 0.0004466892773790808
+  },
+  "fit_quality": {
+    "chi2": 66.94035008768294,
+    "ndof": 48,
+    "chi2_ndof": 1.394590626826728,
+    "n_fitted_bins": 55
+  },
+  "fit_status": {
+    "backend": "scipy",
+    "success": true,
+    "valid": true,
+    "accurate_covariance": false,
+    "positive_definite_covariance": false,
+    "edm": null,
+    "nfcn": 296,
+    "message": "CONVERGENCE: REL_REDUCTION_OF_F_<=_FACTR*EPSMCH",
+    "negative_log_likelihood": -5441.126799698333,
+    "n_candidates": 1621,
+    "n_fitted_candidates": 1621,
+    "fit_range": [
+      5000.0,
+      5600.0
+    ],
+    "bins": 80,
+    "n_parameters": 7
+  },
+  "note": "First nominal mass fit with a configurable Gaussian or double-Gaussian signal model; not yet a full systematic study.",
+  "data_path": "data/raw/B2HHH_MagnetDown.root",
+  "mass_column": "B_mass",
+  "selection": "src.physics.selection.prepare_selected_candidates"
+}

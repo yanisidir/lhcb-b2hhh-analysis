@@ -1,0 +1,46 @@
+{
+  "number_of_toys": 100,
+  "injected_A_raw": -0.04075938417812977,
+  "number_of_fit_failures": 0,
+  "number_valid_for_pull_studies": 99,
+  "fit_failure_rate": 0.0,
+  "valid_for_pull_studies_rate": 0.99,
+  "all_toys": {
+    "number_of_toys": 100,
+    "number_with_fitted_A_raw": 100,
+    "mean_fitted_A_raw": -0.043713678167822956,
+    "injected_A_raw": -0.04075938417812977,
+    "bias": -0.0029542939896931852,
+    "std_fitted_A_raw": 0.03297054140201119,
+    "mean_fitted_uncertainty": 0.028963201254026263,
+    "mean_A_raw_pull": -0.07506434132419361,
+    "A_raw_pull_width": 1.0780688544458221,
+    "mean_N_plus_pull": 0.08418369393573114,
+    "N_plus_pull_width": 0.9510440872258706,
+    "mean_N_minus_pull": -0.011285552248266311,
+    "N_minus_pull_width": 1.1714424414552789
+  },
+  "valid_toys": {
+    "number_of_toys": 99,
+    "number_with_fitted_A_raw": 99,
+    "mean_fitted_A_raw": -0.04321175730075111,
+    "injected_A_raw": -0.04075938417812977,
+    "bias": -0.0024523731226213374,
+    "std_fitted_A_raw": 0.0327520914305702,
+    "mean_fitted_uncertainty": 0.029054286629044305,
+    "mean_A_raw_pull": -0.04916213839299144,
+    "A_raw_pull_width": 1.0518150700849427,
+    "mean_N_plus_pull": 0.08418369393573114,
+    "N_plus_pull_width": 0.9510440872258706,
+    "mean_N_minus_pull": -0.012061168180914673,
+    "N_minus_pull_width": 1.177378211249623
+  },
+  "fit_range": [
+    5000.0,
+    5600.0
+  ],
+  "bins": 80,
+  "random_seed": 12345,
+  "baseline_dir": "results/fits/charge_separated",
+  "note": "Toy-MC validation generated from the nominal charge-separated mass model. This validates the statistical machinery only, not detector-level systematics."
+}

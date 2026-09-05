@@ -1,0 +1,52 @@
+{
+  "signal_yield": 640.0450448490982,
+  "background_yield": 112.97786796216634,
+  "mass_mean": 5285.910628308229,
+  "background_slope": -0.004741461885846022,
+  "mass_resolution": 18.973606342896083,
+  "mass_resolution_narrow": 3.7176508209372625,
+  "mass_resolution_wide": 19.065531020929434,
+  "signal_fraction": 0.01,
+  "signal_model": "double_gaussian",
+  "parameter_uncertainties": {
+    "signal_yield": 25.82385927976916,
+    "background_yield": 11.752616662110807,
+    "mass_mean": 0.7935007538600594,
+    "mass_resolution_narrow": 0.0,
+    "mass_resolution_wide": 0.6959868989419838,
+    "signal_fraction": 0.025603911393546702,
+    "background_slope": 0.0006959365792368333
+  },
+  "fit_quality": {
+    "chi2": 33.20206592768033,
+    "ndof": 42,
+    "chi2_ndof": 0.790525379230484,
+    "n_fitted_bins": 49
+  },
+  "fit_status": {
+    "backend": "scipy",
+    "success": true,
+    "valid": true,
+    "accurate_covariance": false,
+    "positive_definite_covariance": false,
+    "edm": null,
+    "nfcn": 248,
+    "message": "CONVERGENCE: REL_REDUCTION_OF_F_<=_FACTR*EPSMCH",
+    "negative_log_likelihood": -2017.0110367950747,
+    "n_candidates": 753,
+    "n_fitted_candidates": 753,
+    "fit_range": [
+      5000.0,
+      5600.0
+    ],
+    "bins": 80,
+    "n_parameters": 7
+  },
+  "note": "Charge-separated first nominal mass fit; not yet a full systematic study.",
+  "data_path": "data/raw/B2HHH_MagnetDown.root",
+  "mass_column": "B_mass",
+  "charge_definition": "total_charge = H1_Charge + H2_Charge + H3_Charge",
+  "selection": "src.physics.selection.prepare_selected_candidates",
+  "charge_sample": "B_minus",
+  "total_charge": -1
+}
