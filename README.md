@@ -1,276 +1,167 @@
-# LHCb B -> hhh Analysis
+# Three-body B-meson decays with LHCb Open Data
 
-Modern Python workflow for a compact experimental particle-physics analysis using CERN Open Data from LHCb. The project reconstructs three-body B-meson candidates, studies the invariant-mass spectrum, builds a sideband-labelled signal/background classifier, and extends the workflow toward CP-asymmetry and Dalitz-plot studies.
+A compact but complete flavour-physics analysis chain on CERN Open Data: ROOT
+ntuples in, reconstructed invariant masses, binned maximum-likelihood fits,
+charge-separated yields, a toy-MC validation of the statistical machinery, two
+systematic studies, and a local asymmetry diagnostic across the Dalitz plane.
 
-## Physics Context
+**[Full report (PDF)](report/main.pdf)** &nbsp;·&nbsp;
+**[Slides (PDF)](slides/main.pdf)** &nbsp;·&nbsp;
+Python, `uproot`, `iminuit`, `scikit-learn`, LaTeX
 
-Heavy-flavour decays are a central probe of flavour physics, CP violation, and possible indirect effects of physics beyond the Standard Model. This project focuses on reconstructed B-meson candidates decaying into three charged hadrons, using a simple kaon-mass hypothesis for the daughters. The analysis follows the structure of a small HEP workflow: ROOT data loading, candidate selection, invariant-mass reconstruction, signal modelling, charge-separated comparisons, phase-space visualisation, and machine-learning diagnostics.
+---
 
-## Dataset
+## Result
 
-The input samples are LHCb Open Data ROOT ntuples stored in `data/raw/`:
+The raw charge asymmetry of $B^\pm \to h^\pm h^+ h^-$ candidates, extracted
+from independent fits to the $B^+$ and $B^-$ mass spectra:
 
-- `B2HHH_MagnetDown.root`
-- `B2HHH_MagnetUp.root`
-- `PhaseSpaceSimulation.root`
+$$A_{\mathrm{raw}} = -0.0408 \pm 0.0281\,\mathrm{(stat.)} \pm 0.0433\,\mathrm{(syst.)}$$
 
-The main notebooks use the `DecayTree` from `B2HHH_MagnetDown.root`. The additional samples are kept for future extensions such as magnet-polarity comparisons, acceptance studies, or simulation-based checks.
+| Quantity | Value |
+| --- | --- |
+| Candidates read / selected | 5 135 823 → 1 645 |
+| Signal yield, nominal fit | 1378 ± 38 |
+| Fitted peak position | 5284.4 ± 0.6 MeV/$c^2$ |
+| $N(B^+)$ / $N(B^-)$ | 694 ± 27 / 640 ± 26 |
+| $\chi^2/\mathrm{ndof}$ ($B^+$ / $B^-$) | 1.42 / 0.79 |
+| Systematics (model / range / total) | 0.0255 / 0.0350 / 0.0433 |
+| Toy-MC validation | 100 toys, 0 failures, pull width 1.05, bias −0.0025 |
+| Local Dalitz diagnostic | 10×10 bins, 26 above threshold, max \|significance\| = 3.5 |
 
-## Objectives
+**This is a raw asymmetry, not a CP-violation measurement.** It is not corrected
+for detector-induced charge asymmetries, $B^+/B^-$ production asymmetry,
+trigger and reconstruction efficiencies, or selection-induced charge biases, and
+it uses a single magnet polarity. It is quoted as a diagnostic of the analysis
+chain. The [report](report/main.pdf) states what a real measurement would
+additionally require.
 
-- Explore the ROOT tree and document relevant reconstructed branches.
-- Reconstruct the invariant mass of B -> hhh candidates.
-- Apply transparent physics-motivated quality and PID selections.
-- Fit the selected B-candidate mass spectrum with a Gaussian signal plus linear background model.
-- Define a signal window and sideband regions for labelled ML studies.
-- Train and evaluate a Random Forest signal/background classifier.
-- Compare B+ and B- candidates through a raw integrated CP-asymmetry estimator.
-- Build pairwise invariant-mass variables for Dalitz-plot studies.
-- Produce publication-style figures saved in `figures/`.
+![Nominal invariant-mass fit](figures/mass_fit_plot.png)
 
-## Methods
+---
 
-### Invariant-Mass Reconstruction
+## Analysis chain
 
-The B-candidate mass is computed from the relativistic four-vector sum of the three daughter tracks:
+| Step | What it does | Code |
+| --- | --- | --- |
+| Reconstruction | Four-vector sum of three tracks under a kaon mass hypothesis | [`src/reconstruction/invariant_mass.py`](src/reconstruction/invariant_mass.py) |
+| Selection | Vertex quality, flight distance, kaon PID; shared by every study | [`src/physics/selection.py`](src/physics/selection.py) |
+| Mass models | Gaussian / double-Gaussian signal, finite-range exponential and linear backgrounds | [`src/fitting/mass_models.py`](src/fitting/mass_models.py) |
+| Fitting | Binned extended maximum-likelihood fit, pulls, fit-quality metrics | [`src/fitting/fit_mass.py`](src/fitting/fit_mass.py) |
+| Dalitz kinematics | Pairwise invariant-mass-squared variables | [`src/physics/dalitz.py`](src/physics/dalitz.py) |
+| Classification | Sideband-labelled Random Forest | [`src/ml/signal_background.py`](src/ml/signal_background.py) |
 
-```text
-m_B^2 = E_total^2 - |p_total|^2
+Studies built on top of that: [charge-separated fits](scripts/run_charge_separated_fits.py),
+[toy-MC validation](studies/toy_mc/run_raw_asymmetry_toys.py),
+[fit-model](studies/systematics/run_fit_model_variations.py) and
+[fit-range](studies/systematics/run_fit_range_variations.py) systematics, and the
+[local Dalitz asymmetry](studies/dalitz/run_local_raw_asymmetry.py).
+
+## Results in detail
+
+### Invariant-mass fit
+
+The nominal model is a common-mean double Gaussian for the signal plus a
+finite-range exponential background, fitted over
+$5000 < m(hhh) < 5600~\mathrm{MeV}/c^2$ by binned maximum likelihood. The
+fitted peak sits at 5284.4 ± 0.6 MeV/$c^2$, within a few MeV of the known
+$B^\pm$ mass, which is the main closure check on the reconstruction.
+
+### Charge-separated fits and systematics
+
+The $B^+$ and $B^-$ spectra are fitted independently and the raw asymmetry is
+built from the fitted yields. Two systematic categories are evaluated by
+refitting: the mass-fit model and the fit range. A variation is only used if both
+charge fits converge with positive yields and $\chi^2/\mathrm{ndof} < 2.5$; a
+single-Gaussian stress test is reported but rejected on that criterion. The fit
+range dominates the budget.
+
+![Uncertainty budget](figures/systematic_breakdown.png)
+
+### Toy-MC validation
+
+100 pseudo-experiments are generated from the nominal fitted model with the
+measured yields injected, then refitted with the same model. No fit failures; the
+asymmetry pull has mean −0.049 and width 1.05, and the bias (−0.0025) is an order
+of magnitude below the statistical uncertainty. This validates the statistical
+extraction and the uncertainty propagation, not the detector modelling.
+
+### Local asymmetry across the Dalitz plane
+
+Integrated asymmetries can hide larger local effects in multibody decays, since
+interference between resonant amplitudes varies across phase space. A bin-by-bin
+counting asymmetry is computed on a 10×10 grid, masking bins with fewer than 20
+candidates (26 bins survive). The largest local significance is 3.5, on 26
+inspected bins and with no background subtraction, efficiency correction or
+look-elsewhere treatment — so no structure is claimed.
+
+![Local raw asymmetry](figures/local_A_raw_map.png)
+
+### Signal/background classification
+
+A Random Forest is trained on quality and PID variables (the mass is excluded, as
+it defines the labels), using the central mass window as signal-like and the
+sidebands as background-like. **It reaches AUC = 0.528, i.e. essentially no
+separation**: the baseline cuts have already removed the candidates the available
+features could discriminate, and only 755 labelled candidates remain. The study
+is kept because the negative result is informative — a useful classifier would
+have to be trained before the tight preselection, on a looser sample. See the
+[roadmap](ROADMAP.md).
+
+## Reproducing
+
+The ROOT inputs are not tracked. Place `B2HHH_MagnetDown.root`,
+`B2HHH_MagnetUp.root` and `PhaseSpaceSimulation.root` from the CERN Open Data
+Portal under `data/raw/`, then:
+
+```bash
+python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 ```
 
-The helper function `compute_b_mass(df)` in `src/reconstruction/invariant_mass.py` performs this calculation using the daughter momentum branches `H*_PX`, `H*_PY`, and `H*_PZ`.
-
-### Event Selection
-
-The baseline selection keeps candidates with:
-
-- good B-vertex quality,
-- sizable flight distance,
-- daughter tracks compatible with the kaon PID hypothesis.
-
-These cuts are intentionally simple and interpretable, making the workflow suitable for a portfolio or thesis-application project.
-
-### Signal/Background Classification
-
-The notebook `notebooks/03_signal_background.ipynb` builds proxy labels from mass regions:
-
-- signal-like candidates: central B-mass window,
-- background-like candidates: lower and upper mass sidebands.
-
-The classifier uses reconstruction-quality and PID variables, excluding the mass itself to avoid learning the label definition directly.
-
-### CP Asymmetry
-
-The notebook `notebooks/04_cp_asymmetry.ipynb` separates candidates by total reconstructed charge:
-
-- B+ candidates have total daughter charge +1,
-- B- candidates have total daughter charge -1.
-
-It overlays the B+ and B- invariant-mass spectra and computes a simple raw integrated asymmetry in the signal window:
-
-```text
-A_CP = (N(B-) - N(B+)) / (N(B-) + N(B+))
+```bash
+python scripts/run_mass_fit.py                          # nominal fit
+python scripts/run_charge_separated_fits.py             # B+ / B- fits, raw asymmetry
+python studies/toy_mc/run_raw_asymmetry_toys.py --n-toys 100
+python studies/systematics/run_fit_model_variations.py
+python studies/systematics/run_fit_range_variations.py
+python studies/systematics/summarize_systematics.py     # uncertainty budget
+python studies/dalitz/run_local_raw_asymmetry.py        # local Dalitz diagnostic
 ```
 
-This is a first diagnostic quantity. A realistic measurement would fit signal yields, subtract backgrounds, combine magnet polarities, and correct detector and production asymmetries.
+Numerical outputs land in `results/` as JSON and CSV; those summaries are tracked
+so every number quoted above can be checked against the file that produced it.
+The exploratory notebooks (`notebooks/01`, `03`, `04`, `05`) run in the same
+environment via `jupyter lab` and write their figures to `figures/`.
 
-### Dalitz-Plot Analysis
-
-The notebook `notebooks/05_dalitz_analysis.ipynb` reconstructs the pairwise two-body invariant-mass-squared variables:
-
-- `m_K1K2_sq`
-- `m_K2K3_sq`
-- `m_K1K3_sq`
-
-These variables are used to produce Dalitz-style two-dimensional density maps. The reusable kinematic functions live in `src/physics/dalitz.py`.
-
-## Example Figures
-
-Mass reconstruction after selection:
-
-![B mass after cuts](figures/B_mass_after_cuts.png)
-
-Signal-plus-background mass fit:
-
-![B mass fit](figures/B_mass_fit.png)
-
-Signal/background ROC curve:
-
-![ROC curve](figures/roc_signal_background.png)
-
-Random Forest feature importance:
-
-![Feature importance](figures/feature_importance_signal_background.png)
-
-Charge-separated B-candidate mass spectra:
-
-![CP mass overlay](figures/cp_mass_overlay.png)
-
-Dalitz density map:
-
-![Dalitz plot](figures/dalitz_mK1K2_vs_mK2K3.png)
-
-## Project Structure
+## Repository layout
 
 ```text
 lhcb-b2hhh-analysis/
-├── data/
-│   ├── raw/                  # ROOT inputs, ignored by Git
-│   └── processed/            # derived tables, ignored by Git
-├── figures/                  # saved analysis figures
-├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_mass_reconstruction.ipynb
-│   ├── 03_signal_background.ipynb
-│   ├── 04_cp_asymmetry.ipynb
-│   ├── 05_dalitz_analysis.ipynb
-│   └── 05_machine_learning.ipynb
-├── reports/
-├── src/
-│   ├── physics/
-│   │   ├── dalitz.py
-│   │   └── selection.py
-│   ├── reconstruction/
-│   │   └── invariant_mass.py
-│   ├── plotting/
-│   │   └── mass_plots.py
-│   └── ml/
-│       └── signal_background.py
-├── environment.yml
-├── requirements.txt
-└── README.md
+├── src/                    # reusable analysis code
+│   ├── reconstruction/     # invariant-mass reconstruction
+│   ├── physics/            # baseline selection, Dalitz kinematics
+│   ├── fitting/            # mass models and the binned likelihood fit
+│   ├── ml/                 # sideband-labelled classifier
+│   └── plotting/           # figure helpers
+├── scripts/                # nominal and charge-separated fits
+├── studies/                # toy MC, systematics, local Dalitz asymmetry
+├── notebooks/              # exploratory analysis, kept with outputs
+├── results/                # JSON/CSV summaries (figures regenerated locally)
+├── figures/                # analysis figures
+├── report/                 # LaTeX report (main.pdf)
+├── slides/                 # Beamer presentation (main.pdf)
+└── data/raw/               # ROOT inputs, not tracked
 ```
 
-## Technologies
+## Physics context
 
-- ROOT files for HEP ntuple storage
-- `uproot` for reading ROOT data in Python
-- `pandas` for tabular event processing
-- `numpy` and `scipy` for numerical reconstruction and fitting
-- `matplotlib` for publication-style plots
-- `scikit-learn` for Random Forest classification
+Charged $B$ mesons decaying to three hadrons are a sensitive probe of CP
+violation: resonant and non-resonant amplitudes interfere across the Dalitz
+plane, and that interference can produce large local asymmetries even when the
+integrated one is small. Comparing $B^+$ and $B^-$ yields is the first step
+of such an analysis; everything between that comparison and a physics result is
+correction and control work, which this project documents rather than performs.
 
-## Installation
+## License
 
-Using `conda`:
-
-```bash
-conda env create -f environment.yml
-conda activate lhcb-b2hhh
-python -m ipykernel install --user --name lhcb-b2hhh --display-name "Python (lhcb-b2hhh)"
-```
-
-Using `pip`:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python -m ipykernel install --user --name lhcb-b2hhh --display-name "Python (lhcb-b2hhh)"
-```
-
-## Running the Analysis
-
-Start JupyterLab from the project root:
-
-```bash
-jupyter lab
-```
-
-Recommended notebook order:
-
-1. `notebooks/01_data_exploration.ipynb`
-2. `notebooks/02_mass_reconstruction.ipynb`
-3. `notebooks/03_signal_background.ipynb`
-4. `notebooks/04_cp_asymmetry.ipynb`
-5. `notebooks/05_dalitz_analysis.ipynb`
-
-Figures are saved automatically in `figures/`.
-
-### First Nominal Mass Fit
-
-The reusable fitting infrastructure lives in `src/fitting/`. To run the first
-nominal binned invariant-mass fit of the selected B-candidate spectrum:
-
-```bash
-python scripts/run_mass_fit.py
-```
-
-The script reuses the shared loading, reconstruction, and baseline-selection
-helpers from `src.physics.selection`, then writes:
-
-- `results/fits/mass_fit_results.json`
-- `results/fits/mass_fit_plot.png`
-
-The default nominal signal model is now a common-mean double Gaussian with a
-finite-range exponential background. This is still a first nominal mass fit,
-not yet a full systematic study with alternative shapes, fit ranges, or
-charge-separated yield corrections.
-
-### Charge-Separated Raw Asymmetry
-
-To fit the B+ and B- candidate mass spectra separately and compute the raw
-fitted-yield asymmetry:
-
-```bash
-python scripts/run_charge_separated_fits.py
-```
-
-Outputs are saved in `results/fits/charge_separated/`, including the two
-charge-specific fit JSON files, fit plots, and `raw_asymmetry.json`.
-
-This is a raw asymmetry only. It is not corrected for detector-induced charge
-asymmetry, B production asymmetry, trigger or reconstruction effects, or
-selection-induced charge biases.
-
-### Toy-MC Raw-Asymmetry Validation
-
-To validate the charge-separated fit and raw-asymmetry extraction on pseudo-data
-generated from the nominal fitted model:
-
-```bash
-python studies/toy_mc/run_raw_asymmetry_toys.py
-```
-
-The study writes per-toy results, a JSON summary, and diagnostic plots to
-`results/toy_mc/raw_asymmetry/`. This checks whether the statistical fitting
-machinery recovers injected yields and raw asymmetry on nominal toys; it is not
-a detector-level systematic study.
-
-A 10-toy run is only a technical smoke test. Use at least 100 toys for a
-meaningful first validation, and prefer 500 or more toys when quoting stable
-pull-width estimates.
-
-### Fit-Model Systematics
-
-To compare charge-separated raw-asymmetry fits across implemented fit-model
-variations:
-
-```bash
-python studies/systematics/run_fit_model_variations.py
-```
-
-A model variation is only used as a systematic uncertainty if it provides an
-acceptable description of both charge-separated mass spectra. Stress-test
-models are kept in the results table, but rejected models are not included in
-the recommended model systematic. The first accepted background-shape
-alternative compares the nominal double-Gaussian plus exponential model with a
-double-Gaussian plus finite-range linear background.
-
-### Local Dalitz Raw-Asymmetry Diagnostic
-
-To compute a bin-by-bin raw asymmetry over the selected-candidate Dalitz plane:
-
-```bash
-python studies/dalitz/run_local_raw_asymmetry.py
-```
-
-Outputs are saved in `results/dalitz/local_asymmetry/`, including the per-bin
-CSV table, a JSON summary, and maps of local raw asymmetry, local significance,
-and selected-candidate counts. This is a raw local asymmetry diagnostic only. It
-is not corrected for detector efficiency, background contamination, production
-asymmetry, migration across Dalitz bins, or phase-space acceptance.
-
-## Notes for GitHub
-
-ROOT files and processed data products are ignored by Git to keep the repository lightweight. The README references figures in `figures/`, so keep representative output plots tracked when preparing the public repository.
+[MIT](LICENSE). Data courtesy of the CERN Open Data Portal.
