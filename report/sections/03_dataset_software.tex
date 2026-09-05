@@ -17,7 +17,7 @@ The data are stored in the ROOT format~\cite{root}, a standard file and object f
 
 \subsection{Python analysis workflow}
 
-The analysis is implemented as a Python workflow, with reusable functions under \texttt{src/} and exploratory or result-producing notebooks under \texttt{notebooks/}. The main software components are listed in Table~\ref{tab:software}.
+The analysis is implemented as a Python workflow. Reusable functions live under \texttt{src/}; exploratory notebooks under \texttt{notebooks/}; the fit entry points under \texttt{scripts/}; and the toy-MC, systematic and Dalitz studies under \texttt{studies/}. Every study writes its numerical output as JSON and CSV under \texttt{results/}, so each number quoted in this report can be traced to the file that produced it. The main software components are listed in Table~\ref{tab:software}; they are drawn from the scientific Python stack~\cite{numpy,matplotlib} and from the Scikit-HEP ecosystem~\cite{scikithep}.
 
 \begin{table}[H]
   \centering
@@ -31,6 +31,8 @@ The analysis is implemented as a Python workflow, with reusable functions under 
     \texttt{uproot} & Reading ROOT TTrees directly in Python \\
     \texttt{pandas} & Tabular event manipulation and selections \\
     \texttt{numpy} & Vectorised numerical calculations \\
+    \texttt{scipy} & Special functions used in the mass models \\
+    \texttt{iminuit} & \textsc{Minuit} interface for the likelihood minimisation \\
     \texttt{matplotlib} & Publication-style figures \\
     \texttt{scikit-learn} & Random Forest classifier and performance metrics \\
     \bottomrule
@@ -39,4 +41,4 @@ The analysis is implemented as a Python workflow, with reusable functions under 
 
 The branch set used throughout the analysis includes the momentum components \texttt{H1\_PX}, \texttt{H1\_PY}, \texttt{H1\_PZ} through \texttt{H3\_PZ}, the three track charges, PID variables such as \texttt{H1\_ProbK}, and B-candidate quality variables such as \texttt{B\_VertexChi2} and \texttt{B\_FlightDistance}. A shared selection helper loads these branches, reconstructs the B-candidate mass, and applies the common baseline cuts. This avoids duplicated logic between the mass, machine-learning, CP-asymmetry, and Dalitz notebooks.
 
-The workflow is intentionally modular. The main reusable components are the invariant-mass reconstruction module \path{src/reconstruction/invariant_mass.py}, the mass-plotting helpers in \path{src/plotting/mass_plots.py}, the signal/background utilities in \path{src/ml/signal_background.py}, and the Dalitz-kinematics module \path{src/physics/dalitz.py}. This separation mirrors the structure of a maintainable HEP analysis, where physics definitions, plotting conventions, and machine-learning utilities should be reusable across notebooks.
+The workflow is intentionally modular. The main reusable components are the invariant-mass reconstruction module \path{src/reconstruction/invariant_mass.py}, the mass models and likelihood fit in \path{src/fitting/}, the shared selection in \path{src/physics/selection.py}, the Dalitz-kinematics module \path{src/physics/dalitz.py}, the plotting helpers in \path{src/plotting/mass_plots.py}, and the classifier utilities in \path{src/ml/signal_background.py}. This separation mirrors the structure of a maintainable HEP analysis, where physics definitions, fit models, plotting conventions and machine-learning utilities are reusable across studies rather than duplicated in each of them.

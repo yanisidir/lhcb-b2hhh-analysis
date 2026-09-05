@@ -1,14 +1,26 @@
 \section{Event Selection}
+\label{sec:selection_effect}
 
 Event selection is a central part of any hadron-collider analysis. The raw candidate sample contains true signal decays, partially reconstructed backgrounds, misidentified backgrounds, and random combinations of charged tracks. The goal of the baseline selection is to retain a useful signal-rich region while keeping the cuts simple enough to interpret.
 
-The baseline selection used in this project is
+The open-data ntuple is already preselected: it contains only candidates with
+$\chi^2_{\mathrm{vertex}}(B) < 12$ and $d_{\mathrm{flight}}(B) > 3~\mathrm{mm}$.
+The baseline selection applied on top of that is
 \begin{align}
   \chi^2_{\mathrm{vertex}}(B) &< 5, \\
-  d_{\mathrm{flight}}(B) &> 20, \\
+  d_{\mathrm{flight}}(B) &> 20~\mathrm{mm}, \\
   P_K(H_1), P_K(H_2), P_K(H_3) &> 0.5 .
 \end{align}
-Here $\chi^2_{\mathrm{vertex}}(B)$ denotes the B-candidate vertex-quality variable, $d_{\mathrm{flight}}(B)$ denotes the reconstructed flight-distance variable, and $P_K(H_i)$ denotes the kaon PID response for daughter track $H_i$.
+Here $\chi^2_{\mathrm{vertex}}(B)$ is the $\chi^2$ of the three-track vertex fit,
+not divided by its number of degrees of freedom; $d_{\mathrm{flight}}(B)$ is the
+reconstructed distance in millimetres between the primary and secondary vertices;
+and $P_K(H_i)$ is the kaon PID response for daughter track $H_i$, a
+probability-like variable between 0 and 1.
+
+The selection is severe: it keeps $1645$ of the $5\,135\,823$ candidates in the
+sample, a retention of $3\times10^{-4}$. That is a deliberate trade of efficiency
+for purity, and it has a consequence used later in this report: after these cuts
+there is little residual background left for a classifier to separate.
 
 The vertex-quality cut suppresses candidates whose three tracks do not form a well-reconstructed secondary vertex. This is physically motivated because the daughters of a true B decay should originate from a common decay point. A poor vertex fit is more likely to arise from accidental combinations of tracks produced in different processes or from poorly reconstructed tracks.
 

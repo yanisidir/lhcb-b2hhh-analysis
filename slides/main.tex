@@ -152,24 +152,25 @@
 
 \begin{frame}{Mass Spectrum and Signal Fit}
   \begin{columns}[T,onlytextwidth]
-    \begin{column}{0.49\textwidth}
+    \begin{column}{0.52\textwidth}
       \centering
-      {\scriptsize B-candidate mass after baseline selection}\\[-0.05cm]
-      \includegraphics[width=\textwidth,trim=0 0 0 42,clip]{B_mass_after_cuts.png}
-      \vspace{0.05cm}
-      {\scriptsize Selected candidates}
+      \includegraphics[width=\textwidth]{mass_fit_plot.png}
     \end{column}
-    \begin{column}{0.49\textwidth}
-      \centering
-      \includegraphics[width=\textwidth]{B_mass_fit.png}
-      \vspace{0.05cm}
-      {\scriptsize Gaussian + linear background}
+    \begin{column}{0.46\textwidth}
+      \[
+        f(m)=N_s\,G(m;\mu,\sigma) + N_b\,E(m;\alpha)
+      \]
+      \begin{itemize}
+        \item extended binned likelihood, \textsc{Minuit}
+        \item $N_s = 1331 \pm 39$
+        \item $\mu = 5284.7 \pm 0.6~\mevcc$
+        \item $\sigma = 19.5 \pm 0.5~\mevcc$
+        \item $\chi^2/\mathrm{ndof} = 0.90$
+      \end{itemize}
+      {\footnotesize Fitted from $5200~\mevcc$ up: below that lies a partially
+      reconstructed structure the background model does not describe.}
     \end{column}
   \end{columns}
-  \vspace{0.15cm}
-  \[
-    f(m)=A e^{-(m-\mu)^2/(2\sigma^2)} + a m + b
-  \]
 \end{frame}
 % Speaker note: Highlight that the peak validates the reconstruction and gives a simple signal-extraction benchmark.
 
@@ -213,31 +214,67 @@
   \end{columns}
   \vspace{0.05cm}
   \begin{itemize}
-    \item Sideband-labelled Random Forest classifier.
-    \item AUC is a diagnostic of separation power, not the main physics result.
+    \item Sideband-labelled Random Forest; mass excluded from the features.
+    \item $\mathrm{AUC} = 0.528$: \textbf{no separation}. A negative result, reported as one.
   \end{itemize}
-  {\footnotesize The low AUC indicates limited residual separation after the baseline cuts, not a failure of the physics reconstruction.}
+  {\footnotesize The baseline cuts already removed the background the available features could
+  discriminate, and only 755 labelled candidates remain. The classifier is not used in any
+  result that follows.}
 \end{frame}
 % Speaker note: Make clear that the classifier excludes mass to avoid learning the label definition directly.
 
-\begin{frame}{CP-Asymmetry Diagnostic}
+\begin{frame}{Raw Charge Asymmetry}
   \begin{columns}[T,onlytextwidth]
-    \begin{column}{0.50\textwidth}
+    \begin{column}{0.47\textwidth}
       \[
-        \ACP^{\mathrm{raw}} =
+        A_{\mathrm{raw}} =
         \frac{N(\Bminus)-N(\Bplus)}
              {N(\Bminus)+N(\Bplus)}
       \]
       \begin{itemize}
-        \item signal window: \(5270<m_B<5290~\mevcc\)
-        \item \(N(\Bplus)=282,\quad N(\Bminus)=246\)
-        \item \(\ACP^{\mathrm{raw}}=-0.06818\)
+        \item yields from \emph{separate fits}, not window counting
+        \item $N(\Bplus)=689 \pm 29$, $\chi^2/\mathrm{ndof}=1.67$
+        \item $N(\Bminus)=642 \pm 26$, $\chi^2/\mathrm{ndof}=1.13$
       \end{itemize}
-      {\small Not corrected for detector or production effects.}
+      \begin{block}{Result}
+        $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.032\,\mathrm{(syst.)}$
+      \end{block}
+      {\footnotesize Raw: no detector, production, trigger or efficiency
+      corrections; single magnet polarity.}
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.51\textwidth}
       \centering
-      \includegraphics[width=\textwidth]{cp_mass_overlay.png}
+      \includegraphics[width=0.98\textwidth]{B_minus_fit_plot.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+% Speaker note: State explicitly that this is a raw diagnostic and not a publishable CP measurement.
+
+\begin{frame}{Validation and Systematics}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.46\textwidth}
+      \begin{block}{2000 toy experiments}
+        \begin{itemize}
+          \item generated from the fitted model, refitted
+          \item pull width $0.9999$, bias $<10^{-4}$
+          \item no fit failures
+          \item quoted statistical error is calibrated
+        \end{itemize}
+      \end{block}
+      \begin{block}{Systematics}
+        \begin{itemize}
+          \item fit model: $0.0085$
+          \item fit range: $0.0312$ (dominant)
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=0.95\textwidth]{systematic_breakdown.png}\\[0.15cm]
+      {\scriptsize Variations accepted only if both charge fits reach a valid
+      minimum with $\chi^2/\mathrm{ndof}<2.5$ --- criteria fixed in advance. The
+      double-Gaussian variations fail it: their wide component is degenerate
+      with the background.}
     \end{column}
   \end{columns}
 \end{frame}
@@ -274,20 +311,20 @@
     \begin{column}{0.48\textwidth}
       \begin{block}{Current limitations}
         \begin{itemize}
-          \item raw asymmetry only
-          \item single-polarity demonstration
-          \item simple mass model
-          \item sideband proxy labels
+          \item raw asymmetry, no corrections
+          \item single magnet polarity
+          \item low-mass structure excluded, not modelled
+          \item classifier does not separate
         \end{itemize}
       \end{block}
     \end{column}
     \begin{column}{0.48\textwidth}
       \begin{block}{Next steps}
         \begin{itemize}
+          \item model the partially reconstructed component
           \item combine MagnetUp/MagnetDown
-          \item detector corrections and simulation
-          \item XGBoost or boosted decision trees
-          \item local CP asymmetries in Dalitz bins
+          \item control channel for production/detection asymmetries
+          \item background subtraction per Dalitz bin
         \end{itemize}
       \end{block}
     \end{column}
@@ -300,7 +337,8 @@
     \item Reproducible HEP workflow from ROOT ntuples to physics plots.
     \item Invariant-mass reconstruction under a kaon mass hypothesis.
     \item Shared selections and modular Python functions.
-    \item Sideband ML diagnostics, raw CP-asymmetry study and Dalitz plots.
+    \item Likelihood fits, toy validation, systematics and Dalitz diagnostics.
+    \item $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.032\,\mathrm{(syst.)}$, raw and uncorrected.
   \end{itemize}
 
   \vspace{0.5cm}

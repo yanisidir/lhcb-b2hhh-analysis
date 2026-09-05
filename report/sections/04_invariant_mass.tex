@@ -48,20 +48,60 @@ After applying quality, displacement, and kaon-PID selections, the mass spectrum
 \end{figure}
 
 \subsection{Signal-plus-background fit}
+\label{sec:mass_fit}
 
-A nominal signal extraction is performed with an extended signal-plus-background mass model,
+A nominal signal extraction is performed with an extended binned maximum-likelihood
+fit of the model
 \begin{equation}
   f(m) =
-  N_s S(m) + N_b B(m) .
+  N_s S(m) + N_b B(m) ,
   \label{eq:mass_fit_model}
 \end{equation}
-Here $S(m)$ is a common-mean double-Gaussian signal model for the reconstructed B-candidate peak, $B(m)$ is a finite-range exponential background model for the combinatorial component, and $N_s$ and $N_b$ are the fitted signal and background yields in the fitted mass interval. This model is used as the nominal mass-fit configuration later for the charge-separated \Bplus{} and \Bminus{} fits. Alternative background descriptions are studied as systematic variations in the raw-asymmetry analysis, so the fit shown here should be interpreted as a nominal modelling choice rather than as a final physics measurement.
+where $S(m)$ is the signal mass shape, $B(m)$ a finite-range exponential
+describing the combinatorial background, and $N_s$ and $N_b$ the fitted yields
+inside the fitted interval. The likelihood is minimised with
+\textsc{Minuit}~\cite{minuit} through the \texttt{iminuit} interface.
 
-The fitted distribution is shown in Fig.~\ref{fig:mass_fit}. The visible peak near the B-meson mass demonstrates that the four-vector reconstruction and event selection are behaving sensibly, while the fitted background component provides a compact description of the residual combinatorial contribution.
+Two choices define the nominal configuration, and both are worth stating
+explicitly because they are where this analysis is most fragile.
+
+\paragraph{Fitted interval.} The fit is performed over
+$5200 < m(hhh) < 5600~\mevcc$. The spectrum below $5200~\mevcc$ contains a
+broad structure around $5050$--$5150~\mevcc$, characteristic of partially
+reconstructed and misidentified $B$ decays, which the combinatorial background
+model does not describe. Including it produced a systematic trend in the fit
+residuals on both charge samples. Restricting the interval removes that trend at
+the cost of a shorter low-mass sideband.
+
+\paragraph{Signal shape.} The nominal signal shape is a single Gaussian. A
+common-mean double Gaussian was tested as the nominal shape, since detector-level
+mass peaks often show a narrow core with broader tails, but on this sample its
+wide component is degenerate with the combinatorial background and absorbs it:
+the fitted background yield falls to $22 \pm 34$ candidates, the narrow-core
+fraction is undetermined ($0.17 \pm 0.71$ for the \Bminus{} sample), the
+covariance matrix is not positive definite, and the uncertainty on the signal
+yield inflates from $39$ to $69$. With roughly $1.4\times10^3$ candidates and a
+truncated low-mass sideband, the data do not constrain a second resolution
+component. The double Gaussian is therefore used as a systematic variation
+rather than as the nominal shape.
+
+The nominal fit is shown in Fig.~\ref{fig:mass_fit}. Of the $1645$ selected
+candidates, $1445$ fall inside the fitted interval. The results are
+\begin{align}
+  N_s &= 1331 \pm 39, \\
+  N_b &= 114 \pm 17, \\
+  \mu &= 5284.7 \pm 0.6~\mevcc, \\
+  \sigma &= 19.5 \pm 0.5~\mevcc,
+\end{align}
+with $\chi^2/\mathrm{ndof}=0.90$. The fitted peak position lies within a few
+$\mevcc$ of the known $B^\pm$ mass~\cite{pdg}, which is the main closure check on
+the four-vector reconstruction and the mass hypothesis. The fitted resolution is
+a detector resolution convolved with the kaon mass hypothesis, not a measurement
+of the natural width.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\textwidth]{mass_fit_plot.png}
-  \caption{Selected B-candidate mass spectrum fitted with a double-Gaussian signal component and finite-range exponential background component.}
+  \caption{Selected $B$-candidate mass spectrum fitted with a single-Gaussian signal component and a finite-range exponential background, with fit residuals below.}
   \label{fig:mass_fit}
 \end{figure}

@@ -5,7 +5,7 @@ MAIN=main
 
 all: $(MAIN).pdf
 
-$(MAIN).pdf: $(MAIN).tex bibliography.bib figures/*.png
+$(MAIN).pdf: $(MAIN).tex figures/*.png
 	$(TEX) -interaction=nonstopmode -halt-on-error $(MAIN).tex
 	$(TEX) -interaction=nonstopmode -halt-on-error $(MAIN).tex
 

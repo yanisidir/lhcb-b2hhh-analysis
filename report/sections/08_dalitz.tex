@@ -23,7 +23,7 @@ As in the B-mass reconstruction, each daughter is assigned the kaon mass hypothe
 
 A Dalitz plot displays the density of selected events in a two-dimensional plane of pairwise invariant-mass-squared variables. Resonant two-body substructures can appear as bands, while interference and phase-space effects can produce non-uniform densities. In a complete amplitude analysis, these structures would be modelled with coherent sums of resonant and non-resonant amplitudes. The present analysis restricts itself to visualising the distributions.
 
-Figure~\ref{fig:dalitz_12_23} shows the distribution in the $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ plane. The use of a two-dimensional histogram rather than a raw scatter plot makes dense regions easier to read.
+The density maps below use all selected candidates, without a mass window; the local asymmetry study of Sec.~\ref{sec:local_dalitz} restricts itself to the signal region. Figure~\ref{fig:dalitz_12_23} shows the distribution in the $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ plane. The use of a two-dimensional histogram rather than a raw scatter plot makes dense regions easier to read.
 
 \begin{figure}[H]
   \centering
@@ -51,8 +51,9 @@ Figures~\ref{fig:dalitz_12_13} and~\ref{fig:dalitz_23_13} show the complementary
 Dalitz plots are especially relevant for CP-violation studies in multibody decays. Even if the integrated raw asymmetry is small, local asymmetries in restricted phase-space regions can be larger. This motivates a first bin-by-bin diagnostic of charge-dependent structures across the Dalitz plane.
 
 \subsection{Local raw-asymmetry diagnostic}
+\label{sec:local_dalitz}
 
-The local diagnostic uses the same selected candidates as the integrated raw-asymmetry study. Candidates are split into \Bplus{} and \Bminus{} samples using the total reconstructed daughter charge,
+The local diagnostic uses the candidates of the signal region, $5245 < m(hhh) < 5325~\mevcc$, which is the fitted peak position of Sec.~\ref{sec:mass_fit} widened by twice the fitted resolution. Restricting to that window keeps the diagnostic on the same candidates the mass fits describe; using every selected candidate instead would mix in the sidebands and the low-mass structure excluded from the fits. The window contains $1323$ candidates, $689$ of positive and $634$ of negative charge. Candidates are split into \Bplus{} and \Bminus{} samples using the total reconstructed daughter charge,
 \begin{equation}
   q_{\mathrm{tot}} = q_1 + q_2 + q_3 .
 \end{equation}
@@ -64,11 +65,13 @@ The $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ plane is then divided into regular two-di
 \end{equation}
 where $N_+^{ij}$ and $N_-^{ij}$ are the numbers of \Bplus{} and \Bminus{} candidates in that Dalitz bin. The statistical uncertainty is estimated from binomial counting propagation, and a local significance is formed as $A_{\mathrm{raw}}^{ij}/\sigma(A_{\mathrm{raw}}^{ij})$.
 
-The default study uses a $10\times10$ binning and masks bins with fewer than 20 selected candidates in the asymmetry and significance maps. The bin contents are still stored in the numerical output, but low-statistics regions are not interpreted visually. With this threshold, 26 out of 100 bins pass the requirement. The direct counting asymmetry over the selected candidates entering the local Dalitz study is
+The default study uses a $10\times10$ binning and masks bins with fewer than 20 candidates in the asymmetry and significance maps. The bin contents are still stored in the numerical output, but low-statistics regions are not interpreted visually. With this threshold, 25 out of 100 bins pass the requirement. The direct counting asymmetry over the whole window is
 \begin{equation}
-  A_{\mathrm{raw}} = -0.0748 \pm 0.0246 .
+  A_{\mathrm{raw}} = -0.0416 \pm 0.0275 ,
 \end{equation}
-This number differs from the fit-based integrated asymmetry quoted in the CP-asymmetry section because it is a direct candidate-counting diagnostic. It does not subtract fitted background and does not correct for detector efficiency, phase-space acceptance, bin migration, production asymmetry, or detector-induced charge asymmetries.
+consistent with the fit-based value of Eq.~\ref{eq:raw_asymmetry_fit}, as it should be: the two use the same candidates, one subtracting the fitted background and the other not. The counting value does not correct for detector efficiency, phase-space acceptance, bin migration, production asymmetry, or detector-induced charge asymmetries.
+
+The largest local significance over the 25 populated bins is $2.2$. With 25 bins inspected, a fluctuation of that size is expected in a sample with no local asymmetry at all, so this diagnostic shows no evidence of local structure --- the expected outcome at this sample size. The published LHCb study of local asymmetries in this channel uses a far larger dataset and a finer binning of the Dalitz plane~\cite{lhcb3body}.
 
 Figure~\ref{fig:local_counts_map} shows the selected-candidate population used to define the local bins. The occupancy is highly non-uniform, reflecting both phase-space structure and the effect of the selection. This count map is essential context for interpreting the local asymmetry and significance maps.
 
@@ -88,7 +91,7 @@ Figure~\ref{fig:local_a_raw_map} shows the local raw-asymmetry map after the min
   \label{fig:local_a_raw_map}
 \end{figure}
 
-Figure~\ref{fig:local_significance_map} shows the corresponding local counting significance. The largest local deviations should be interpreted with caution because many bins are inspected and no look-elsewhere correction, background subtraction, or efficiency correction is applied.
+Figure~\ref{fig:local_significance_map} shows the corresponding local counting significance. The largest local deviations must be interpreted with caution because many bins are inspected and no look-elsewhere correction, background subtraction, or efficiency correction is applied.
 
 \begin{figure}[H]
   \centering

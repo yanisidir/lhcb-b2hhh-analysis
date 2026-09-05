@@ -1,4 +1,5 @@
-\section{CP Asymmetry Study}
+\section{Raw Charge Asymmetry}
+\label{sec:cp}
 
 The selected candidates can be separated into charge-conjugate samples using the
 total charge of the three daughter tracks,
@@ -9,30 +10,31 @@ Candidates with $Q_{\mathrm{tot}}=+1$ are classified as \Bplus{} candidates,
 while candidates with $Q_{\mathrm{tot}}=-1$ are classified as \Bminus{}
 candidates. This assignment uses only reconstructed track-charge information
 and is therefore a natural first step toward a charge-asymmetry study in a
-three-charged-hadron final state.
+three-charged-hadron final state. The selected sample contains $884$ \Bplus{}
+and $761$ \Bminus{} candidates.
 
 \subsection{Charge-separated invariant-mass fits}
 
-Rather than counting candidates in a fixed signal window, the updated
-asymmetry extraction fits the \Bplus{} and \Bminus{} invariant-mass spectra
-separately. Each charge sample is fitted in the range
-$5000 < m(hhh) < 5600~\mevcc$ with a common-mean double-Gaussian signal model
-and a finite-range exponential background model. The double-Gaussian signal
-shape provides a narrow core plus a broader resolution component, which is a
-more realistic detector-level description than a single Gaussian.
+Rather than counting candidates in a fixed signal window, the asymmetry is
+extracted by fitting the \Bplus{} and \Bminus{} invariant-mass spectra
+separately, with the nominal model of Sec.~\ref{sec:mass_fit}: a single Gaussian
+signal and a finite-range exponential background over
+$5200 < m(hhh) < 5600~\mevcc$. Fitting rather than counting matters here,
+because a fixed window mixes the background into the yield, and the background
+fraction need not be the same for the two charges.
 
 The fitted spectra are shown in Fig.~\ref{fig:charge_fit_plus} and
-Fig.~\ref{fig:charge_fit_minus}. The fits converge for both charge categories
-and give acceptable goodness-of-fit values, with
-$\chi^2/\mathrm{ndof}=1.42$ for the \Bplus{} sample and
-$\chi^2/\mathrm{ndof}=0.79$ for the \Bminus{} sample. The fitted signal yields
+Fig.~\ref{fig:charge_fit_minus}. Both fits converge to a valid minimum with a
+positive-definite covariance matrix, and give
+$\chi^2/\mathrm{ndof}=1.67$ for the \Bplus{} sample and
+$\chi^2/\mathrm{ndof}=1.13$ for the \Bminus{} sample. The fitted signal yields
 are
 \begin{align}
-  N(\Bplus) &= 694.4 \pm 27.2, \\
-  N(\Bminus) &= 640.0 \pm 25.8,
+  N(\Bplus) &= 689.1 \pm 28.6, \\
+  N(\Bminus) &= 642.1 \pm 26.2,
 \end{align}
 where the uncertainties are the statistical yield uncertainties returned by
-the binned mass fits.
+the binned likelihood fits.
 
 \begin{figure}[H]
   \centering
@@ -59,76 +61,95 @@ The fitted signal yields are used to construct the raw asymmetry
 \end{equation}
 Propagating the independent fitted-yield uncertainties gives
 \begin{equation}
-  A_{\mathrm{raw}} = -0.0408 \pm 0.0281~\mathrm{(stat.)}.
+  A_{\mathrm{raw}} = -0.0353 \pm 0.0290~\mathrm{(stat.)}.
 \end{equation}
 After including the systematic variations described below, the result is
-reported as
 \begin{equation}
   A_{\mathrm{raw}} =
-  -0.0408 \pm 0.0281~\mathrm{(stat.)}
-  \pm 0.0433~\mathrm{(syst.)}.
+  -0.0353 \pm 0.0290~\mathrm{(stat.)}
+  \pm 0.0323~\mathrm{(syst.)},
   \label{eq:raw_asymmetry_result}
 \end{equation}
+that is, compatible with zero at the level of $0.8$ standard deviations of the
+total uncertainty.
 
 This is a raw asymmetry, not a physical CP-asymmetry measurement. It still
 contains detector-induced charge asymmetries, possible \Bplus{}/\Bminus{}
 production asymmetries, trigger and reconstruction effects, residual
-background-model dependence, and selection-induced charge biases. A complete
-measurement would require detector calibration, magnet-polarity combination,
-background control, efficiency corrections, and a more complete systematic
-uncertainty programme. The value in Eq.~\ref{eq:raw_asymmetry_result} should
-therefore be interpreted as a diagnostic of the analysis workflow rather than
-as evidence for CP violation.
+background-model dependence, and selection-induced charge biases, and it uses a
+single magnet polarity. A complete measurement would require detector
+calibration, magnet-polarity combination, background control, efficiency
+corrections, a control channel to cancel production and detection asymmetries,
+and a more complete systematic uncertainty programme. The value in
+Eq.~\ref{eq:raw_asymmetry_result} should therefore be interpreted as a
+diagnostic of the analysis workflow rather than as evidence for CP violation.
+
+For orientation only, the published LHCb measurement of the inclusive CP
+asymmetry in $B^\pm \to K^\pm K^+ K^-$, using the full 2011 dataset with all
+corrections applied, is $A_{CP} = -0.043 \pm 0.009~\mathrm{(stat.)} \pm
+0.003~\mathrm{(syst.)} \pm 0.007~(J/\psi K^\pm)$~\cite{lhcb3body}. The raw value
+obtained here is of the same sign and magnitude, with an uncertainty about four
+times larger. That numerical proximity is encouraging but must not be read as a
+validation: none of the corrections that turn a raw asymmetry into a CP
+asymmetry have been applied, and the uncorrected detector and production effects
+are not known to be small compared with the quoted uncertainty.
 
 \subsection{Toy-MC validation}
 
 The statistical machinery was validated with pseudo-experiments generated from
 the nominal charge-separated fitted model. In each toy experiment, \Bplus{} and
 \Bminus{} mass spectra were generated with the injected fitted yields and then
-refitted with the same double-Gaussian plus exponential model used in the data
-fit. The toy study checks whether the fitting and uncertainty propagation
-recover the injected raw asymmetry when the fit model is correct.
+refitted with the same model used in the data fit. The toy study checks whether
+the fitting procedure and the uncertainty propagation recover the injected raw
+asymmetry when the fit model is correct.
 
-A 100-toy validation with fixed random seed produced 99 toys suitable for pull
-studies and no fit failures. For the valid toys, the mean raw-asymmetry pull
-was $-0.049$ and the pull width was $1.052$, compatible with the expected
-standard normal behaviour for this sample size. The fitted bias was
-$-0.0025$, well below the typical fitted statistical uncertainty of about
-$0.029$. These results indicate that the nominal statistical extraction is
-well behaved on pseudo-data generated from the fitted model. This validation is
-not a detector-level systematic study.
+A study of $2000$ toys with a fixed random seed produced no fit failures and no
+toy rejected from the pull study. The mean raw-asymmetry pull is $-0.003$ and
+the pull width is $0.9999$, both consistent with a standard normal distribution.
+The fitted bias is below $10^{-4}$, four orders of magnitude smaller than the
+statistical uncertainty. The mean fitted uncertainty, $0.02889$, matches the
+observed spread of the fitted asymmetries, $0.02888$, so the uncertainty
+returned by the fit is correctly calibrated. This validates the statistical
+extraction under a correct model; it is not a detector-level systematic study,
+and it cannot detect a bias caused by the model itself being wrong.
 
 \subsection{Systematic uncertainties}
 
-Two first systematic categories are evaluated for the raw asymmetry: the choice
-of mass-fit model and the choice of invariant-mass fit range. In both cases,
-alternative fits are accepted only if the \Bplus{} and \Bminus{} fits converge,
-the fitted yields and yield uncertainties are positive, and the
-$\chi^2/\mathrm{ndof}$ values remain below 2.5 for both charge-separated mass
-spectra.
+Two systematic categories are evaluated for the raw asymmetry: the choice of
+mass-fit model and the choice of invariant-mass fit range. In both cases,
+alternative fits are accepted only if the \Bplus{} and \Bminus{} fits converge to
+a valid minimum, the fitted yields and yield uncertainties are positive, and the
+$\chi^2/\mathrm{ndof}$ values remain below $2.5$ for both charge-separated mass
+spectra. These criteria were fixed before the variations were run.
 
-The fit-model study compares the nominal double-Gaussian plus exponential model
-with an accepted double-Gaussian plus linear-background alternative. A
-single-Gaussian plus exponential model is also retained as a stress test, but
-it is not used to assign the systematic uncertainty because it does not provide
-an acceptable description of the \Bminus{} spectrum. The accepted
-linear-background variation shifts the raw asymmetry by $0.0255$, which is
-taken as the fit-model systematic uncertainty.
+The fit-model study compares the nominal single Gaussian plus exponential model
+with a single Gaussian plus finite-range linear background, and with two
+double-Gaussian alternatives. The linear-background variation is accepted and
+shifts the raw asymmetry by $0.0085$, which is taken as the fit-model systematic
+uncertainty. Both double-Gaussian variations are rejected: as discussed in
+Sec.~\ref{sec:mass_fit}, their wide component is degenerate with the
+combinatorial background, and the \Bminus{} fit does not reach a valid minimum.
+Their shifts are reported in Fig.~\ref{fig:fit_model_systematic} for
+transparency, and they are large --- of order $0.045$ --- which is a direct
+statement of how much this measurement would depend on a signal shape that the
+present sample cannot constrain.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\textwidth]{fit_model_variations.png}
-  \caption{Raw asymmetry obtained with different charge-separated mass-fit models. Rejected stress-test variations are shown for comparison but are not used in the systematic assignment.}
+  \caption{Raw asymmetry obtained with different charge-separated mass-fit models. Rejected variations are shown for comparison but are not used in the systematic assignment.}
   \label{fig:fit_model_systematic}
 \end{figure}
 
-The fit-range study repeats the nominal double-Gaussian plus exponential fits
-for narrower and wider mass intervals. These variations test the sensitivity
-to the amount of sideband information included in the background constraint.
-All tested fit-range variations pass the quality requirements. The largest
-accepted shift is $0.0350$, obtained from the wider high-mass range
-$5000 < m(hhh) < 5700~\mevcc$, and is assigned as the fit-range systematic
-uncertainty.
+The fit-range study repeats the nominal fits for narrower and wider mass
+intervals. All tested variations pass the quality requirements. The largest
+accepted shift is $0.0312$, obtained when the lower edge is raised from $5200$ to
+$5230~\mevcc$, and is assigned as the fit-range systematic uncertainty. A shift
+of one statistical standard deviation for a $30~\mevcc$ change of the lower edge
+is the dominant weakness of this measurement: it says that the result still
+depends on how much of the low-mass shoulder enters the fit. Extending the model
+with a dedicated partially-reconstructed component, rather than excluding the
+region, is the natural next step.
 
 \begin{figure}[H]
   \centering
@@ -139,8 +160,8 @@ uncertainty.
 
 Table~\ref{tab:raw_asymmetry_uncertainties} summarizes the uncertainty
 components. The total systematic uncertainty is obtained by adding the
-fit-model and fit-range components in quadrature. The total uncertainty,
-including statistics, is $0.0516$.
+fit-model and fit-range components in quadrature, which assumes they are
+independent. The total uncertainty, including statistics, is $0.0435$.
 
 \begin{table}[H]
   \centering
@@ -150,10 +171,12 @@ including statistics, is $0.0516$.
     \toprule
     Source & Uncertainty on $A_{\mathrm{raw}}$ \\
     \midrule
-    Statistical & 0.0281 \\
-    Fit-model systematic & 0.0255 \\
-    Fit-range systematic & 0.0350 \\
-    Total systematic & 0.0433 \\
+    Statistical & 0.0290 \\
+    Fit-model systematic & 0.0085 \\
+    Fit-range systematic & 0.0312 \\
+    Total systematic & 0.0323 \\
+    \midrule
+    Total & 0.0435 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -165,11 +188,11 @@ including statistics, is $0.0516$.
   \label{fig:systematic_breakdown}
 \end{figure}
 
-The dominant systematic contribution in this first study comes from the fit
-range, followed by the background-model variation. These studies probe only a
-limited set of analysis choices. Additional signal-shape variations, broader
-background-shape alternatives, magnet-polarity comparisons, and
-detector-efficiency corrections would be required before interpreting the raw
-asymmetry as a corrected CP observable.
+The dominant systematic contribution comes from the fit range, followed by the
+background-model variation. These studies probe only a limited set of analysis
+choices. Signal-shape variations that the present statistics can support,
+magnet-polarity comparisons, a control channel, and detector-efficiency
+corrections would all be required before interpreting the raw asymmetry as a
+corrected CP observable.
 
 \clearpage
