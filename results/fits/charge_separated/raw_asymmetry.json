@@ -1,18 +1,18 @@
 {
-  "N_plus": 694.4377414134755,
-  "sigma_N_plus": 27.155322794866798,
-  "N_minus": 640.0450448490982,
-  "sigma_N_minus": 25.82385927976916,
-  "A_raw": -0.04075938417812977,
-  "sigma_A_raw": 0.02804692856739971,
-  "fit_model_used": "double_gaussian",
+  "N_plus": 689.0573745943661,
+  "sigma_N_plus": 28.56220139381395,
+  "N_minus": 642.107924330929,
+  "sigma_N_minus": 26.1955669349976,
+  "A_raw": -0.03526943671183539,
+  "sigma_A_raw": 0.029043570218278723,
+  "fit_model_used": "gaussian + exponential",
   "fit_range": [
-    5000.0,
+    5200.0,
     5600.0
   ],
   "n_candidates_plus": 884,
   "n_candidates_minus": 761,
-  "n_fitted_candidates_plus": 868,
-  "n_fitted_candidates_minus": 753,
+  "n_fitted_candidates_plus": 772,
+  "n_fitted_candidates_minus": 673,
   "note": "Raw fitted-yield asymmetry only; no corrections for detector, production, trigger, reconstruction, or selection-induced charge asymmetries are applied."
 }

@@ -26,6 +26,7 @@ from src.plotting.mass_plots import set_hep_style
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "dalitz" / "local_asymmetry"
+DEFAULT_MASS_WINDOW = (5245.0, 5325.0)
 DEFAULT_X_VAR = "m_K1K2_sq"
 DEFAULT_Y_VAR = "m_K2K3_sq"
 CAVEAT = (
@@ -65,14 +66,26 @@ def load_selected_with_dalitz(
     data_path: Path,
     x_var: str = DEFAULT_X_VAR,
     y_var: str = DEFAULT_Y_VAR,
+    mass_window: tuple[float, float] | None = DEFAULT_MASS_WINDOW,
 ):
     """Load selected B candidates and attach Dalitz coordinates if needed.
 
     The returned table uses the shared baseline selection and the project
     convention for kaon-hypothesis pair masses. Charge separation is defined by
     the sum of the three daughter charges.
+
+    ``mass_window`` restricts the candidates to a signal region around the
+    fitted B peak, so the local diagnostic is dominated by the same candidates
+    the mass fits describe. Passing ``None`` keeps every selected candidate,
+    which mixes signal with the sideband and low-mass regions.
     """
     selected = prepare_selected_candidates(data_path).copy()
+
+    if mass_window is not None:
+        low, high = (float(value) for value in mass_window)
+        if not low < high:
+            raise ValueError("mass_window must be an increasing (low, high) interval.")
+        selected = selected.loc[selected["B_mass"].between(low, high)].copy()
 
     missing = {x_var, y_var}.difference(selected.columns)
     if missing:
@@ -303,6 +316,7 @@ def build_summary(
     bins_x: int,
     bins_y: int,
     min_count: int,
+    mass_window,
 ):
     n_plus = int((candidates["total_charge"] == 1).sum())
     n_minus = int((candidates["total_charge"] == -1).sum())
@@ -328,6 +342,7 @@ def build_summary(
             "source": "src.physics.dalitz.compute_dalitz_variables",
         },
         "charge_definition": "total_charge = H1_Charge + H2_Charge + H3_Charge",
+        "mass_window": None if mass_window is None else [float(v) for v in mass_window],
         "bins_x": bins_x,
         "bins_y": bins_y,
         "min_count": min_count,
@@ -358,6 +373,19 @@ def parse_args():
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
         help="Directory for local Dalitz-asymmetry outputs.",
+    )
+    parser.add_argument(
+        "--mass-window",
+        type=float,
+        nargs=2,
+        default=DEFAULT_MASS_WINDOW,
+        metavar=("LOW", "HIGH"),
+        help="Signal mass window in MeV/c^2 applied before the Dalitz binning.",
+    )
+    parser.add_argument(
+        "--no-mass-window",
+        action="store_true",
+        help="Use every selected candidate instead of a signal mass window.",
     )
     parser.add_argument("--bins-x", type=int, default=10, help="Number of Dalitz bins along x.")
     parser.add_argument("--bins-y", type=int, default=10, help="Number of Dalitz bins along y.")
@@ -408,7 +436,8 @@ def main():
     if not data_path.exists():
         raise FileNotFoundError(f"Input ROOT file not found: {data_path}")
 
-    candidates = load_selected_with_dalitz(data_path, args.x_var, args.y_var)
+    mass_window = None if args.no_mass_window else tuple(float(v) for v in args.mass_window)
+    candidates = load_selected_with_dalitz(data_path, args.x_var, args.y_var, mass_window)
     result = compute_local_asymmetry(
         candidates,
         x_var=args.x_var,
@@ -436,6 +465,7 @@ def main():
         bins_x=args.bins_x,
         bins_y=args.bins_y,
         min_count=args.min_count,
+        mass_window=mass_window,
     )
     summary_path.write_text(
         json.dumps(_json_safe(summary), indent=2) + "\n",

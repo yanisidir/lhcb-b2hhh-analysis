@@ -92,7 +92,29 @@ def _model_counts(
     )
 
 
-def _plot_fit(masses, result, output_path: Path, fit_range: tuple[float, float], bins: int):
+def _fit_summary_text(result) -> str:
+    """Return the fitted yield and fit quality, for annotation on the fit plot."""
+    yield_uncertainty = result.get("parameter_uncertainties", {}).get("signal_yield")
+    if yield_uncertainty is None:
+        signal = f"$N_\\mathrm{{sig}} = {result['signal_yield']:.0f}$"
+    else:
+        signal = f"$N_\\mathrm{{sig}} = {result['signal_yield']:.0f} \\pm {yield_uncertainty:.0f}$"
+
+    lines = [signal, f"$\\mu = {result['mass_mean']:.1f}$ MeV/$c^2$"]
+    chi2_ndof = result["fit_quality"]["chi2_ndof"]
+    if chi2_ndof is not None:
+        lines.append(f"$\\chi^2/\\mathrm{{ndof}} = {chi2_ndof:.2f}$")
+    return "\n".join(lines)
+
+
+def _plot_fit(
+    masses,
+    result,
+    output_path: Path,
+    fit_range: tuple[float, float],
+    bins: int,
+    title: str = "Nominal B-candidate invariant-mass fit",
+):
     import os
     import tempfile
 
@@ -152,8 +174,18 @@ def _plot_fit(masses, result, output_path: Path, fit_range: tuple[float, float],
         label="Background",
     )
     ax.set_ylabel("Candidates / bin")
-    ax.set_title("First nominal B-candidate invariant-mass fit")
+    ax.set_title(title)
     ax.legend(frameon=False)
+    ax.text(
+        0.025,
+        0.95,
+        _fit_summary_text(result),
+        transform=ax.transAxes,
+        va="top",
+        ha="left",
+        fontsize=9,
+        linespacing=1.5,
+    )
     ax.grid(True, alpha=0.25)
 
     ax_pull.axhline(0.0, color="black", linewidth=1.0)
@@ -177,7 +209,7 @@ def parse_args():
     parser.add_argument(
         "--signal-model",
         choices=("gaussian", "double_gaussian"),
-        default="double_gaussian",
+        default="gaussian",
         help="Signal mass model used in the nominal fit.",
     )
     parser.add_argument(
@@ -190,7 +222,7 @@ def parse_args():
         "--fit-range",
         type=float,
         nargs=2,
-        default=(5000.0, 5600.0),
+        default=(5200.0, 5600.0),
         metavar=("LOW", "HIGH"),
         help="Fitted invariant-mass range in MeV/c^2.",
     )

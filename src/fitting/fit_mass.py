@@ -127,7 +127,7 @@ def _parameter_limits(
             {
                 "sigma_narrow": (1.0, 0.25 * (high - low)),
                 "sigma_wide": (1.0, 0.75 * (high - low)),
-                "signal_fraction": (0.01, 0.99),
+                "signal_fraction": (0.0, 1.0),
             }
         )
 
@@ -486,9 +486,9 @@ def _result_parameters(fit_values: Mapping[str, float], signal_model: str):
 
 def fit_mass_distribution(
     masses,
-    fit_range: tuple[float, float] = (5000, 5600),
+    fit_range: tuple[float, float] = (5200, 5600),
     bins: int = 80,
-    signal_model: str = "double_gaussian",
+    signal_model: str = "gaussian",
     background_model: str = "exponential",
 ):
     """Fit selected B-candidate invariant masses with a nominal mass model.
@@ -496,9 +496,10 @@ def fit_mass_distribution(
     The fit is an extended binned Poisson likelihood using either a Gaussian or
     common-mean double-Gaussian signal PDF for the B peak, with a finite-range
     normalized exponential or linear PDF for the combinatorial background.  The
-    double-Gaussian model is the default nominal signal shape because
-    detector-level mass peaks often contain a narrow core and broader tails.
-    This remains a first nominal fit and does not include systematic variations.
+    single Gaussian is the default: on this sample the wide component of the
+    double Gaussian is degenerate with the combinatorial background, which it
+    absorbs, and the double-Gaussian model is therefore used as a systematic
+    variation rather than as the nominal shape.
     """
     signal_model = _validate_signal_model(signal_model)
     background_model = _validate_background_model(background_model)

@@ -31,36 +31,36 @@ from src.plotting.mass_plots import set_hep_style
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "systematics"
-SIGNAL_MODEL = "double_gaussian"
+SIGNAL_MODEL = "gaussian"
 BACKGROUND_MODEL = "exponential"
 FIT_RANGE_VARIATIONS = [
     {
-        "range_name": "nominal_5000_5600",
-        "fit_range": (5000.0, 5600.0),
+        "range_name": "nominal_5200_5600",
+        "fit_range": (5200.0, 5600.0),
         "variation_role": "nominal",
         "is_nominal": True,
     },
     {
-        "range_name": "narrower_low_5050_5600",
-        "fit_range": (5050.0, 5600.0),
+        "range_name": "narrower_low_5230_5600",
+        "fit_range": (5230.0, 5600.0),
         "variation_role": "candidate_systematic",
         "is_nominal": False,
     },
     {
-        "range_name": "narrower_high_5000_5550",
-        "fit_range": (5000.0, 5550.0),
+        "range_name": "narrower_high_5200_5550",
+        "fit_range": (5200.0, 5550.0),
         "variation_role": "candidate_systematic",
         "is_nominal": False,
     },
     {
-        "range_name": "narrower_both_5050_5550",
-        "fit_range": (5050.0, 5550.0),
+        "range_name": "narrower_both_5230_5550",
+        "fit_range": (5230.0, 5550.0),
         "variation_role": "candidate_systematic",
         "is_nominal": False,
     },
     {
-        "range_name": "wider_high_5000_5700",
-        "fit_range": (5000.0, 5700.0),
+        "range_name": "wider_high_5200_5700",
+        "fit_range": (5200.0, 5700.0),
         "variation_role": "candidate_systematic",
         "is_nominal": False,
     },

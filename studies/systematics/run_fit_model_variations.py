@@ -30,24 +30,31 @@ from src.plotting.mass_plots import set_hep_style
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "systematics"
 MODEL_VARIATIONS = [
     {
-        "model_name": "nominal_double_gaussian_exponential",
-        "signal_model": "double_gaussian",
+        "model_name": "nominal_gaussian_exponential",
+        "signal_model": "gaussian",
         "background_model": "exponential",
         "variation_role": "nominal",
         "is_nominal": True,
+    },
+    {
+        "model_name": "gaussian_linear_background",
+        "signal_model": "gaussian",
+        "background_model": "linear",
+        "variation_role": "candidate_systematic",
+        "is_nominal": False,
+    },
+    {
+        "model_name": "double_gaussian_exponential",
+        "signal_model": "double_gaussian",
+        "background_model": "exponential",
+        "variation_role": "candidate_systematic",
+        "is_nominal": False,
     },
     {
         "model_name": "double_gaussian_linear_background",
         "signal_model": "double_gaussian",
         "background_model": "linear",
         "variation_role": "candidate_systematic",
-        "is_nominal": False,
-    },
-    {
-        "model_name": "stress_test_single_gaussian_exponential",
-        "signal_model": "gaussian",
-        "background_model": "exponential",
-        "variation_role": "stress_test",
         "is_nominal": False,
     },
     {
@@ -412,7 +419,7 @@ def parse_args():
         "--fit-range",
         type=float,
         nargs=2,
-        default=(5000.0, 5600.0),
+        default=(5200.0, 5600.0),
         metavar=("LOW", "HIGH"),
         help="Fitted invariant-mass range in MeV/c^2.",
     )

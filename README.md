@@ -16,18 +16,19 @@ Python, `uproot`, `iminuit`, `scikit-learn`, LaTeX
 The raw charge asymmetry of $B^\pm \to h^\pm h^+ h^-$ candidates, extracted
 from independent fits to the $B^+$ and $B^-$ mass spectra:
 
-$$A_{\mathrm{raw}} = -0.0408 \pm 0.0281\,\mathrm{(stat.)} \pm 0.0433\,\mathrm{(syst.)}$$
+$$A_{\mathrm{raw}} = -0.0353 \pm 0.0290\,\mathrm{(stat.)} \pm 0.0323\,\mathrm{(syst.)}$$
 
 | Quantity | Value |
 | --- | --- |
-| Candidates read / selected | 5 135 823 → 1 645 |
-| Signal yield, nominal fit | 1378 ± 38 |
-| Fitted peak position | 5284.4 ± 0.6 MeV/$c^2$ |
-| $N(B^+)$ / $N(B^-)$ | 694 ± 27 / 640 ± 26 |
-| $\chi^2/\mathrm{ndof}$ ($B^+$ / $B^-$) | 1.42 / 0.79 |
-| Systematics (model / range / total) | 0.0255 / 0.0350 / 0.0433 |
-| Toy-MC validation | 100 toys, 0 failures, pull width 1.05, bias −0.0025 |
-| Local Dalitz diagnostic | 10×10 bins, 26 above threshold, max \|significance\| = 3.5 |
+| Candidates read / selected / in fit range | 5 135 823 → 1 645 → 1 445 |
+| Signal yield, nominal fit | 1331 ± 39 |
+| Fitted peak position | 5284.7 ± 0.6 MeV/$c^2$ |
+| Mass resolution | 19.5 ± 0.5 MeV/$c^2$ |
+| $N(B^+)$ / $N(B^-)$ | 689 ± 29 / 642 ± 26 |
+| $\chi^2/\mathrm{ndof}$ ($B^+$ / $B^-$) | 1.67 / 1.13 |
+| Systematics (model / range / total) | 0.0085 / 0.0312 / 0.0323 |
+| Toy-MC validation | 2000 toys, 0 failures, pull width 1.000, bias < 10⁻⁴ |
+| Local Dalitz diagnostic | 10×10 bins, 25 above threshold, max \|significance\| = 2.2 |
 
 **This is a raw asymmetry, not a CP-violation measurement.** It is not corrected
 for detector-induced charge asymmetries, $B^+/B^-$ production asymmetry,
@@ -61,39 +62,55 @@ Studies built on top of that: [charge-separated fits](scripts/run_charge_separat
 
 ### Invariant-mass fit
 
-The nominal model is a common-mean double Gaussian for the signal plus a
-finite-range exponential background, fitted over
-$5000 < m(hhh) < 5600~\mathrm{MeV}/c^2$ by binned maximum likelihood. The
-fitted peak sits at 5284.4 ± 0.6 MeV/$c^2$, within a few MeV of the known
-$B^\pm$ mass, which is the main closure check on the reconstruction.
+The nominal model is a single Gaussian signal plus a finite-range exponential
+background, fitted over $5200 < m(hhh) < 5600~\mathrm{MeV}/c^2$ by binned
+extended maximum likelihood (MINUIT). The fitted peak sits at 5284.7 ± 0.6
+MeV/$c^2$, within a few MeV of the known $B^\pm$ mass, which is the main closure
+check on the reconstruction.
+
+Two modelling choices are worth stating, because they are where the analysis is
+weakest. The fit starts at 5200 MeV/$c^2$ to exclude a structure around
+5050–5150 MeV/$c^2$ — partially reconstructed and misidentified decays that the
+combinatorial model does not describe. And a common-mean **double Gaussian was
+tested and rejected as the nominal shape**: on this sample its wide component is
+degenerate with the combinatorial background, which it absorbs (fitted
+background 22 ± 34, narrow-core fraction undetermined at 0.17 ± 0.71 for
+$B^-$, minimum not valid). It is retained as a systematic variation instead.
 
 ### Charge-separated fits and systematics
 
 The $B^+$ and $B^-$ spectra are fitted independently and the raw asymmetry is
 built from the fitted yields. Two systematic categories are evaluated by
 refitting: the mass-fit model and the fit range. A variation is only used if both
-charge fits converge with positive yields and $\chi^2/\mathrm{ndof} < 2.5$; a
-single-Gaussian stress test is reported but rejected on that criterion. The fit
-range dominates the budget.
+charge fits converge with a valid minimum, positive yields and
+$\chi^2/\mathrm{ndof} < 2.5$; the two double-Gaussian variations fail that
+criterion and are reported as rejected. The fit range dominates the budget:
+moving the lower edge by 30 MeV/$c^2$ shifts the asymmetry by 0.031, about one
+statistical standard deviation, which is the honest measure of how much the
+low-mass contamination still matters.
 
 ![Uncertainty budget](figures/systematic_breakdown.png)
 
 ### Toy-MC validation
 
-100 pseudo-experiments are generated from the nominal fitted model with the
+2000 pseudo-experiments are generated from the nominal fitted model with the
 measured yields injected, then refitted with the same model. No fit failures; the
-asymmetry pull has mean −0.049 and width 1.05, and the bias (−0.0025) is an order
-of magnitude below the statistical uncertainty. This validates the statistical
-extraction and the uncertainty propagation, not the detector modelling.
+asymmetry pull has mean −0.003 and width 1.000, and the fitted bias is below
+$10^{-4}$. The mean fitted uncertainty (0.02889) matches the spread of the fitted
+asymmetries (0.02888), so the quoted statistical uncertainty is correctly
+calibrated. This validates the statistical extraction and the uncertainty
+propagation, not the detector modelling.
 
 ### Local asymmetry across the Dalitz plane
 
 Integrated asymmetries can hide larger local effects in multibody decays, since
 interference between resonant amplitudes varies across phase space. A bin-by-bin
-counting asymmetry is computed on a 10×10 grid, masking bins with fewer than 20
-candidates (26 bins survive). The largest local significance is 3.5, on 26
-inspected bins and with no background subtraction, efficiency correction or
-look-elsewhere treatment — so no structure is claimed.
+counting asymmetry is computed on a 10×10 grid over the candidates in the signal
+window 5245–5325 MeV/$c^2$, masking bins with fewer than 20 candidates (25 bins
+survive). The counting asymmetry over that window, −0.0416 ± 0.0275, agrees with
+the fit-based value. The largest local significance is 2.2, on 25 inspected bins
+and with no background subtraction, efficiency correction or look-elsewhere
+treatment — so no structure is claimed.
 
 ![Local raw asymmetry](figures/local_A_raw_map.png)
 
@@ -121,7 +138,7 @@ python -m venv .venv && source .venv/bin/activate && pip install -r requirements
 ```bash
 python scripts/run_mass_fit.py                          # nominal fit
 python scripts/run_charge_separated_fits.py             # B+ / B- fits, raw asymmetry
-python studies/toy_mc/run_raw_asymmetry_toys.py --n-toys 100
+python studies/toy_mc/run_raw_asymmetry_toys.py --n-toys 2000
 python studies/systematics/run_fit_model_variations.py
 python studies/systematics/run_fit_range_variations.py
 python studies/systematics/summarize_systematics.py     # uncertainty budget

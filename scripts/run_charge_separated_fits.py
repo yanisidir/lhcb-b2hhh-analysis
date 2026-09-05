@@ -91,7 +91,7 @@ def parse_args():
     parser.add_argument(
         "--signal-model",
         choices=("gaussian", "double_gaussian"),
-        default="double_gaussian",
+        default="gaussian",
         help="Signal mass model used in the nominal charge-separated fits.",
     )
     parser.add_argument(
@@ -104,7 +104,7 @@ def parse_args():
         "--fit-range",
         type=float,
         nargs=2,
-        default=(5000.0, 5600.0),
+        default=(5200.0, 5600.0),
         metavar=("LOW", "HIGH"),
         help="Fitted invariant-mass range in MeV/c^2.",
     )
@@ -188,8 +188,22 @@ def main():
         json.dumps(_json_safe(asymmetry), indent=2) + "\n",
         encoding="utf-8",
     )
-    _plot_fit(plus_masses, plus_result, plus_plot_path, fit_range=fit_range, bins=args.bins)
-    _plot_fit(minus_masses, minus_result, minus_plot_path, fit_range=fit_range, bins=args.bins)
+    _plot_fit(
+        plus_masses,
+        plus_result,
+        plus_plot_path,
+        fit_range=fit_range,
+        bins=args.bins,
+        title=r"$B^+$ candidates: invariant-mass fit",
+    )
+    _plot_fit(
+        minus_masses,
+        minus_result,
+        minus_plot_path,
+        fit_range=fit_range,
+        bins=args.bins,
+        title=r"$B^-$ candidates: invariant-mass fit",
+    )
 
     print(f"B+ candidates:            {len(b_plus):,}")
     print(f"B- candidates:            {len(b_minus):,}")

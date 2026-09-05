@@ -1,94 +1,126 @@
 {
   "status": "complete with accepted model variations",
-  "nominal_model": "nominal_double_gaussian_exponential",
-  "nominal_A_raw": -0.04075938417812977,
+  "nominal_model": "nominal_gaussian_exponential",
+  "nominal_A_raw": -0.03526943671183539,
   "all_tested_model_variations": [
     {
-      "model_name": "nominal_double_gaussian_exponential",
-      "signal_model": "double_gaussian",
+      "model_name": "nominal_gaussian_exponential",
+      "signal_model": "gaussian",
       "background_model": "exponential",
       "variation_role": "nominal",
-      "A_raw": -0.04075938417812977,
-      "sigma_A_raw": 0.02804692856739971,
+      "A_raw": -0.03526943671183539,
+      "sigma_A_raw": 0.029043570218278723,
       "delta_A_raw": 0.0,
       "is_nominal": true,
       "accepted_for_systematic": true,
       "rejection_reason": "",
       "fit_success_plus": true,
       "fit_success_minus": true,
-      "chi2_ndof_plus": 1.4185460904736187,
-      "chi2_ndof_minus": 0.790525379230484
+      "chi2_ndof_plus": 1.669023961739673,
+      "chi2_ndof_minus": 1.1276972895974253
+    },
+    {
+      "model_name": "gaussian_linear_background",
+      "signal_model": "gaussian",
+      "background_model": "linear",
+      "variation_role": "candidate_systematic",
+      "A_raw": -0.04381021480408998,
+      "sigma_A_raw": 0.028385919210456568,
+      "delta_A_raw": -0.008540778092254592,
+      "is_nominal": false,
+      "accepted_for_systematic": true,
+      "rejection_reason": "",
+      "fit_success_plus": true,
+      "fit_success_minus": true,
+      "chi2_ndof_plus": 1.3491331746269541,
+      "chi2_ndof_minus": 1.1361792675322342
+    },
+    {
+      "model_name": "double_gaussian_exponential",
+      "signal_model": "double_gaussian",
+      "background_model": "exponential",
+      "variation_role": "candidate_systematic",
+      "A_raw": -0.08011444867338076,
+      "sigma_A_raw": 0.03004723655446109,
+      "delta_A_raw": -0.04484501196154537,
+      "is_nominal": false,
+      "accepted_for_systematic": false,
+      "rejection_reason": "B- fit did not converge",
+      "fit_success_plus": true,
+      "fit_success_minus": false,
+      "chi2_ndof_plus": 1.570999225576031,
+      "chi2_ndof_minus": 1.2074611423985084
     },
     {
       "model_name": "double_gaussian_linear_background",
       "signal_model": "double_gaussian",
       "background_model": "linear",
       "variation_role": "candidate_systematic",
-      "A_raw": -0.06622748032074426,
-      "sigma_A_raw": 0.02830061205209699,
-      "delta_A_raw": -0.025468096142614485,
-      "is_nominal": false,
-      "accepted_for_systematic": true,
-      "rejection_reason": "",
-      "fit_success_plus": true,
-      "fit_success_minus": true,
-      "chi2_ndof_plus": 1.2583374689832338,
-      "chi2_ndof_minus": 0.8423767785095977
-    },
-    {
-      "model_name": "stress_test_single_gaussian_exponential",
-      "signal_model": "gaussian",
-      "background_model": "exponential",
-      "variation_role": "stress_test",
-      "A_raw": -0.2449741513257487,
-      "sigma_A_raw": 0.028060460995614146,
-      "delta_A_raw": -0.20421476714761894,
+      "A_raw": -0.07201892919960544,
+      "sigma_A_raw": 0.02615683332683938,
+      "delta_A_raw": -0.03674949248777005,
       "is_nominal": false,
       "accepted_for_systematic": false,
-      "rejection_reason": "B- chi2/ndof >= 2.5; stress-test model, not accepted for systematic assignment",
-      "fit_success_plus": true,
+      "rejection_reason": "B+ fit did not converge",
+      "fit_success_plus": false,
       "fit_success_minus": true,
-      "chi2_ndof_plus": 1.2687124166686572,
-      "chi2_ndof_minus": 3.9933389890040187
+      "chi2_ndof_plus": 1.5486791910091116,
+      "chi2_ndof_minus": 1.151573426007796
     }
   ],
   "accepted_systematic_variations": [
     {
-      "model_name": "double_gaussian_linear_background",
-      "signal_model": "double_gaussian",
+      "model_name": "gaussian_linear_background",
+      "signal_model": "gaussian",
       "background_model": "linear",
       "variation_role": "candidate_systematic",
-      "A_raw": -0.06622748032074426,
-      "sigma_A_raw": 0.02830061205209699,
-      "delta_A_raw": -0.025468096142614485,
+      "A_raw": -0.04381021480408998,
+      "sigma_A_raw": 0.028385919210456568,
+      "delta_A_raw": -0.008540778092254592,
       "is_nominal": false,
       "accepted_for_systematic": true,
       "rejection_reason": "",
       "fit_success_plus": true,
       "fit_success_minus": true,
-      "chi2_ndof_plus": 1.2583374689832338,
-      "chi2_ndof_minus": 0.8423767785095977
+      "chi2_ndof_plus": 1.3491331746269541,
+      "chi2_ndof_minus": 1.1361792675322342
     }
   ],
-  "rejected_stress_test_variations": [
+  "rejected_stress_test_variations": [],
+  "rejected_candidate_systematic_variations": [
     {
-      "model_name": "stress_test_single_gaussian_exponential",
-      "signal_model": "gaussian",
+      "model_name": "double_gaussian_exponential",
+      "signal_model": "double_gaussian",
       "background_model": "exponential",
-      "variation_role": "stress_test",
-      "A_raw": -0.2449741513257487,
-      "sigma_A_raw": 0.028060460995614146,
-      "delta_A_raw": -0.20421476714761894,
+      "variation_role": "candidate_systematic",
+      "A_raw": -0.08011444867338076,
+      "sigma_A_raw": 0.03004723655446109,
+      "delta_A_raw": -0.04484501196154537,
       "is_nominal": false,
       "accepted_for_systematic": false,
-      "rejection_reason": "B- chi2/ndof >= 2.5; stress-test model, not accepted for systematic assignment",
+      "rejection_reason": "B- fit did not converge",
       "fit_success_plus": true,
+      "fit_success_minus": false,
+      "chi2_ndof_plus": 1.570999225576031,
+      "chi2_ndof_minus": 1.2074611423985084
+    },
+    {
+      "model_name": "double_gaussian_linear_background",
+      "signal_model": "double_gaussian",
+      "background_model": "linear",
+      "variation_role": "candidate_systematic",
+      "A_raw": -0.07201892919960544,
+      "sigma_A_raw": 0.02615683332683938,
+      "delta_A_raw": -0.03674949248777005,
+      "is_nominal": false,
+      "accepted_for_systematic": false,
+      "rejection_reason": "B+ fit did not converge",
+      "fit_success_plus": false,
       "fit_success_minus": true,
-      "chi2_ndof_plus": 1.2687124166686572,
-      "chi2_ndof_minus": 3.9933389890040187
+      "chi2_ndof_plus": 1.5486791910091116,
+      "chi2_ndof_minus": 1.151573426007796
     }
   ],
-  "rejected_candidate_systematic_variations": [],
   "pending_model_variations": [
     {
       "model_name": "double_gaussian_polynomial_background",
@@ -105,9 +137,9 @@
       "reason": "Pending: Crystal Ball signal support requires extending the signal-model interface."
     }
   ],
-  "max_abs_delta_A_raw_all_tested": 0.20421476714761894,
-  "max_abs_delta_A_raw_accepted": 0.025468096142614485,
-  "recommended_model_systematic": 0.025468096142614485,
+  "max_abs_delta_A_raw_all_tested": 0.04484501196154537,
+  "max_abs_delta_A_raw_accepted": 0.008540778092254592,
+  "recommended_model_systematic": 0.008540778092254592,
   "fit_quality_criteria": {
     "max_chi2_ndof": 2.5,
     "require_converged_B_plus": true,
@@ -116,7 +148,7 @@
     "require_positive_yield_uncertainties": true
   },
   "fit_range": [
-    5000.0,
+    5200.0,
     5600.0
   ],
   "bins": 80,
