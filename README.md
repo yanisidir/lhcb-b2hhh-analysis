@@ -129,9 +129,11 @@ have to be trained before the tight preselection, on a looser sample. See the
 
 ## Reproducing
 
-The ROOT inputs are not tracked. Place `B2HHH_MagnetDown.root`,
-`B2HHH_MagnetUp.root` and `PhaseSpaceSimulation.root` from the CERN Open Data
-Portal under `data/raw/`, then:
+The ROOT inputs are not tracked. Download the three files of the CERN Open Data
+record [*Matter Antimatter Differences (B meson decays to three hadrons)*](https://opendata.cern.ch/record/4900)
+(LHCb, 2017, [DOI 10.7483/OPENDATA.LHCB.AOF7.JH09](https://doi.org/10.7483/OPENDATA.LHCB.AOF7.JH09),
+CC0) — `B2HHH_MagnetDown.root`, `B2HHH_MagnetUp.root` and
+`PhaseSpaceSimulation.root` — into `data/raw/`, then:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
@@ -193,4 +195,5 @@ correction and control work, which this project documents rather than performs.
 
 ## License
 
-[MIT](LICENSE). Data courtesy of the CERN Open Data Portal.
+Code under the [MIT licence](LICENSE). The input data are released by the LHCb
+collaboration under CC0 through the [CERN Open Data Portal](https://opendata.cern.ch/record/4900).
