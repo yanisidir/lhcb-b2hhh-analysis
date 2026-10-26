@@ -8,7 +8,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.physics.dalitz import compute_dalitz_variables, compute_pair_mass
+from src.physics.dalitz import (
+    OPPOSITE_SIGN_HIGH,
+    OPPOSITE_SIGN_LOW,
+    SAME_SIGN,
+    compute_charge_ordered_dalitz_variables,
+    compute_dalitz_variables,
+    compute_pair_mass,
+)
 from src.physics.selection import apply_baseline_selection
 from src.reconstruction.invariant_mass import KAON_MASS_MEV, compute_b_mass
 
@@ -102,3 +109,87 @@ def test_baseline_selection_thresholds_are_configurable():
     assert len(
         apply_baseline_selection(df, vertex_chi2_max=8.0, flight_distance_min=5.0, probk_min=0.3)
     ) == 1
+
+
+MOMENTA = {
+    "H1": (800.0, 120.0, 4000.0),
+    "H2": (-300.0, 640.0, 2500.0),
+    "H3": (150.0, -400.0, 1800.0),
+}
+
+
+def _charged_candidate(momenta, charges):
+    df = _candidate(momenta)
+    for hadron, charge in charges.items():
+        df[f"{hadron}_Charge"] = [charge]
+    return df
+
+
+def _ordered(df):
+    dalitz = compute_charge_ordered_dalitz_variables(df)
+    return (
+        float(dalitz[OPPOSITE_SIGN_LOW].iloc[0]),
+        float(dalitz[OPPOSITE_SIGN_HIGH].iloc[0]),
+        float(dalitz[SAME_SIGN].iloc[0]),
+    )
+
+
+def test_charge_ordered_variables_pick_the_opposite_sign_pairs():
+    # H2 is the odd track of a B+ -> K+ K- K+ candidate: the K+K- pairs are
+    # (H1, H2) and (H2, H3), the K+K+ pair is (H1, H3).
+    df = _charged_candidate(MOMENTA, {"H1": 1, "H2": -1, "H3": 1})
+    m12 = compute_pair_mass(df, "H1", "H2", squared=True).iloc[0]
+    m23 = compute_pair_mass(df, "H2", "H3", squared=True).iloc[0]
+    m13 = compute_pair_mass(df, "H1", "H3", squared=True).iloc[0]
+
+    low, high, same_sign = _ordered(df)
+
+    assert (low, high) == pytest.approx((min(m12, m23), max(m12, m23)))
+    assert same_sign == pytest.approx(m13)
+    assert low <= high
+
+
+@pytest.mark.parametrize(
+    "permutation",
+    [("H1", "H2", "H3"), ("H2", "H3", "H1"), ("H3", "H1", "H2"), ("H2", "H1", "H3"), ("H1", "H3", "H2")],
+)
+def test_charge_ordered_variables_do_not_depend_on_the_track_labels(permutation):
+    """The H1/H2/H3 labels are arbitrary, so relabelling must change nothing.
+
+    This is the property the label-based pair masses lack, and the reason they
+    cannot be used to compare B+ and B- bin by bin.
+    """
+    charges = {"H1": 1, "H2": -1, "H3": 1}
+    reference = _ordered(_charged_candidate(MOMENTA, charges))
+
+    relabelled_momenta = {new: MOMENTA[old] for new, old in zip(("H1", "H2", "H3"), permutation)}
+    relabelled_charges = {new: charges[old] for new, old in zip(("H1", "H2", "H3"), permutation)}
+
+    assert _ordered(_charged_candidate(relabelled_momenta, relabelled_charges)) == pytest.approx(reference)
+
+
+def test_charge_ordered_variables_are_the_same_for_the_conjugate_decay():
+    """Flipping every charge maps a B+ candidate onto the same Dalitz point."""
+    b_plus = _ordered(_charged_candidate(MOMENTA, {"H1": 1, "H2": -1, "H3": 1}))
+    b_minus = _ordered(_charged_candidate(MOMENTA, {"H1": -1, "H2": 1, "H3": -1}))
+
+    assert b_minus == pytest.approx(b_plus)
+
+
+def test_label_based_pair_masses_do_depend_on_the_track_labels():
+    """Documents why the label-based variables are not Dalitz coordinates."""
+    df = _charged_candidate(MOMENTA, {"H1": 1, "H2": -1, "H3": 1})
+    relabelled = _charged_candidate(
+        {"H1": MOMENTA["H2"], "H2": MOMENTA["H3"], "H3": MOMENTA["H1"]},
+        {"H1": -1, "H2": 1, "H3": 1},
+    )
+
+    assert compute_dalitz_variables(df)["m_K1K2_sq"].iloc[0] != pytest.approx(
+        compute_dalitz_variables(relabelled)["m_K1K2_sq"].iloc[0]
+    )
+
+
+def test_candidates_without_a_unit_total_charge_have_no_dalitz_point():
+    df = _charged_candidate(MOMENTA, {"H1": 1, "H2": 1, "H3": 1})
+
+    assert all(np.isnan(value) for value in _ordered(df))

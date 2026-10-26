@@ -8,13 +8,15 @@ and the fit must recover them. That is the same logic as the toy-MC study under
 import numpy as np
 import pytest
 
-from src.fitting.acceptance import fit_quality_acceptance
+from src.fitting.acceptance import barlow_shift, fit_quality_acceptance
 from src.fitting.asymmetry import raw_asymmetry
-from src.fitting.fit_mass import fit_mass_distribution
+from src.fitting.fit_mass import _fit_quality, _result_parameters, fit_mass_distribution
 from src.fitting.mass_models import (
     double_gaussian_pdf,
     exponential_background_pdf,
     gaussian_pdf,
+    signal_background_binned_model,
+    signal_background_density,
 )
 
 
@@ -156,3 +158,197 @@ def test_unusable_variations_are_rejected_with_a_reason(overrides, expected):
     accepted, reason = fit_quality_acceptance(_acceptance_row(**overrides))
     assert not accepted
     assert expected in reason
+
+
+DOUBLE_GAUSSIAN = {
+    "signal_model": "double_gaussian",
+    "sigma_wide": 100.0,
+    "signal_fraction": 0.7,
+}
+
+
+def test_double_gaussian_density_integrates_to_the_binned_model():
+    """The plotted density must be the PDF the binned fit actually uses.
+
+    Both are normalised, so a mismatch does not show up in either one alone:
+    the two have to be compared bin by bin.
+    """
+    edges = np.linspace(*FIT_RANGE, 21)
+    binned = signal_background_binned_model(
+        edges,
+        1000.0,
+        0.0,
+        5285.0,
+        19.5,
+        0.0,
+        fit_range=FIT_RANGE,
+        **DOUBLE_GAUSSIAN,
+    )
+    assert binned.sum() == pytest.approx(1000.0, rel=1e-9)
+
+    for index in range(len(edges) - 1):
+        grid = np.linspace(edges[index], edges[index + 1], 801)
+        density = signal_background_density(
+            grid,
+            1000.0,
+            0.0,
+            5285.0,
+            19.5,
+            0.0,
+            FIT_RANGE,
+            **DOUBLE_GAUSSIAN,
+        )
+        assert _integral(density, grid) == pytest.approx(binned[index], rel=1e-5)
+
+
+def _double_gaussian_fit_values(sigma_narrow: float, sigma_wide: float, signal_fraction: float):
+    return {
+        "signal_yield": 1000.0,
+        "background_yield": 200.0,
+        "mean": 5285.0,
+        "sigma_narrow": sigma_narrow,
+        "sigma_wide": sigma_wide,
+        "signal_fraction": signal_fraction,
+        "slope": -0.002,
+    }
+
+
+def _double_gaussian_uncertainties():
+    return {
+        "signal_yield": 40.0,
+        "background_yield": 20.0,
+        "mass_mean": 0.8,
+        "mass_resolution_narrow": 5.0,
+        "mass_resolution_wide": 0.5,
+        "signal_fraction": 0.05,
+        "background_slope": 1.0e-4,
+    }
+
+
+def test_relabelled_double_gaussian_components_keep_their_uncertainties():
+    """When the fitted widths come back in the wrong order they are swapped.
+
+    The reported uncertainties have to be swapped with them, or each width is
+    quoted with the error of the other component.
+    """
+    fit_values = _double_gaussian_fit_values(60.0, 18.0, 0.3)
+    uncertainties = _double_gaussian_uncertainties()
+
+    result, reported = _result_parameters(fit_values, uncertainties, "double_gaussian")
+
+    assert result["mass_resolution_narrow"] == 18.0
+    assert result["mass_resolution_wide"] == 60.0
+    assert result["signal_fraction"] == pytest.approx(0.7)
+    # 0.5 was the error on the 18 MeV width, which is now the narrow component.
+    assert reported["mass_resolution_narrow"] == 0.5
+    assert reported["mass_resolution_wide"] == 5.0
+    # The caller's dictionary must not be mutated in place.
+    assert uncertainties["mass_resolution_narrow"] == 5.0
+
+
+def test_ordered_double_gaussian_components_are_left_alone():
+    fit_values = _double_gaussian_fit_values(18.0, 60.0, 0.7)
+    result, reported = _result_parameters(fit_values, _double_gaussian_uncertainties(), "double_gaussian")
+
+    assert result["mass_resolution_narrow"] == 18.0
+    assert result["mass_resolution_wide"] == 60.0
+    assert result["signal_fraction"] == pytest.approx(0.7)
+    assert reported["mass_resolution_narrow"] == 5.0
+    assert reported["mass_resolution_wide"] == 0.5
+
+
+def test_effective_double_gaussian_resolution_has_no_quoted_uncertainty():
+    """It mixes three correlated parameters, so it needs the covariance matrix."""
+    fit_values = _double_gaussian_fit_values(18.0, 60.0, 0.7)
+    result, reported = _result_parameters(fit_values, _double_gaussian_uncertainties(), "double_gaussian")
+
+    expected = np.sqrt(0.7 * 18.0**2 + 0.3 * 60.0**2)
+    assert result["mass_resolution"] == pytest.approx(expected)
+    assert "mass_resolution" in reported
+    assert reported["mass_resolution"] is None
+
+
+def test_barlow_removes_the_statistical_part_of_a_shift():
+    # sigma_barlow = sqrt(0.05^2 - 0.03^2) = 0.04, so a 0.05 shift keeps 0.03.
+    result = barlow_shift(0.05, 0.05, 0.03)
+
+    assert result["sigma_barlow"] == pytest.approx(0.04)
+    assert result["barlow_significance"] == pytest.approx(1.25)
+    assert result["barlow_corrected_shift"] == pytest.approx(0.03)
+
+
+def test_a_shift_within_its_statistical_spread_assigns_nothing():
+    result = barlow_shift(-0.01, 0.05, 0.03)
+
+    assert result["barlow_corrected_shift"] == 0.0
+
+
+def test_barlow_is_symmetric_between_subset_and_superset():
+    assert barlow_shift(0.05, 0.03, 0.05) == pytest.approx(barlow_shift(0.05, 0.05, 0.03))
+
+
+def test_barlow_without_an_uncertainty_gives_nothing():
+    assert barlow_shift(0.05, None, 0.03)["barlow_corrected_shift"] is None
+
+
+def test_likelihood_ratio_chi2_is_zero_for_a_perfect_match_and_counts_empty_bins():
+    expected = np.array([5.0, 3.0, 2.0, 1.0])
+    counts = np.array([5, 3, 2, 0])
+
+    quality = _fit_quality(counts, expected, n_parameters=1)
+
+    # The empty bin contributes 2 * expected = 2; the others match exactly.
+    assert quality["chi2_likelihood_ratio"] == pytest.approx(2.0)
+    assert quality["ndof_likelihood_ratio"] == 3
+    # The Neyman chi2 silently drops it.
+    assert quality["n_fitted_bins"] == 3
+
+
+def _asymptotic_p_values(mean_count: float, n_bins: int = 60, n_trials: int = 2000):
+    rng = np.random.default_rng(11)
+    expected = np.full(n_bins, mean_count)
+    return np.array(
+        [
+            _fit_quality(rng.poisson(expected), expected, n_parameters=0)[
+                "p_value_likelihood_ratio_asymptotic"
+            ]
+            for _ in range(n_trials)
+        ]
+    )
+
+
+def test_asymptotic_likelihood_ratio_p_value_is_calibrated_at_high_counts():
+    p_values = _asymptotic_p_values(mean_count=25.0)
+
+    assert np.mean(p_values) == pytest.approx(0.5, abs=0.03)
+    assert np.mean(p_values < 0.05) == pytest.approx(0.05, abs=0.015)
+
+
+def test_asymptotic_likelihood_ratio_p_value_is_not_calibrated_at_low_counts():
+    """Why the quoted goodness-of-fit p-value is taken from toys instead.
+
+    With a few candidates per bin the asymptotic formula rejects a correct
+    model well above its nominal rate; with mostly empty bins it errs the other
+    way. Either way it cannot be quoted for these spectra.
+    """
+    p_values = _asymptotic_p_values(mean_count=2.0)
+
+    assert np.mean(p_values < 0.05) > 0.10
+
+
+def test_single_gaussian_fit_uses_one_starting_point():
+    """The nominal model must not change behaviour with the multi-start search."""
+    masses = _generate_pseudo_data(2000, 500, 5280.0, 20.0, slope=-0.004, seed=3)
+
+    status = fit_mass_distribution(masses, fit_range=FIT_RANGE)["fit_status"]
+
+    assert status["n_starting_points"] == 1
+
+
+def test_double_gaussian_fit_tries_several_starting_points():
+    masses = _generate_pseudo_data(2000, 500, 5280.0, 20.0, slope=-0.004, seed=3)
+
+    status = fit_mass_distribution(masses, fit_range=FIT_RANGE, signal_model="double_gaussian")["fit_status"]
+
+    assert status["n_starting_points"] > 1
+    assert status["valid"]

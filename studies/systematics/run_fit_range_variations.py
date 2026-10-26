@@ -16,7 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.fitting.acceptance import fit_quality_acceptance, status_summary
+from src.fitting.acceptance import barlow_shift, fit_quality_acceptance, status_summary
 from src.fitting.asymmetry import raw_asymmetry
 from src.fitting.fit_mass import fit_mass_distribution
 from src.physics.selection import prepare_selected_candidates
@@ -208,8 +208,13 @@ def write_csv(rows, output_path: Path):
         writer.writerows(json_safe(row) for row in rows)
 
 
-def _summary_entry(row, nominal_a_raw):
+def _summary_entry(row, nominal_a_raw, nominal_sigma_a_raw):
     delta = row["A_raw"] - nominal_a_raw if row["A_raw"] is not None else None
+    barlow = (
+        barlow_shift(delta, row["sigma_A_raw"], nominal_sigma_a_raw)
+        if not row["is_nominal"]
+        else {"sigma_barlow": None, "barlow_significance": None, "barlow_corrected_shift": None}
+    )
     return {
         "range_name": row["range_name"],
         "fit_range": [row["fit_range_low"], row["fit_range_high"]],
@@ -218,6 +223,7 @@ def _summary_entry(row, nominal_a_raw):
         "A_raw": row["A_raw"],
         "sigma_A_raw": row["sigma_A_raw"],
         "delta_A_raw": delta,
+        **barlow,
         "is_nominal": row["is_nominal"],
         "accepted_for_systematic": row["accepted_for_systematic"],
         "rejection_reason": row["rejection_reason"],
@@ -236,7 +242,7 @@ def summarize_variations(rows, bins: int, max_chi2_ndof: float):
         raise ValueError("No nominal fit range was run.")
 
     nominal_a_raw = nominal["A_raw"]
-    tested_ranges = [_summary_entry(row, nominal_a_raw) for row in rows]
+    tested_ranges = [_summary_entry(row, nominal_a_raw, nominal["sigma_A_raw"]) for row in rows]
     accepted_ranges = [
         entry
         for entry in tested_ranges
@@ -252,7 +258,13 @@ def summarize_variations(rows, bins: int, max_chi2_ndof: float):
         for entry in accepted_ranges
         if entry["delta_A_raw"] is not None
     ]
-    recommended = max(accepted_deltas) if accepted_deltas else None
+    max_abs_delta = max(accepted_deltas) if accepted_deltas else None
+    corrected_shifts = [
+        entry["barlow_corrected_shift"]
+        for entry in accepted_ranges
+        if entry["barlow_corrected_shift"] is not None
+    ]
+    recommended = max(corrected_shifts) if corrected_shifts else None
     status = (
         "complete with accepted fit-range variations"
         if accepted_deltas
@@ -269,8 +281,12 @@ def summarize_variations(rows, bins: int, max_chi2_ndof: float):
         "all_tested_fit_ranges": tested_ranges,
         "accepted_fit_range_variations": accepted_ranges,
         "rejected_fit_range_variations": rejected_ranges,
-        "max_abs_delta_A_raw_accepted": recommended,
+        "max_abs_delta_A_raw_accepted": max_abs_delta,
         "recommended_fit_range_systematic": recommended,
+        "systematic_definition": (
+            "Largest Barlow-corrected shift sqrt(max(delta^2 - sigma_barlow^2, 0)) "
+            "over the accepted variations, sigma_barlow = sqrt(|sigma_var^2 - sigma_nom^2|)."
+        ),
         "fit_quality_criteria": {
             "max_chi2_ndof": max_chi2_ndof,
             "require_converged_B_plus": True,

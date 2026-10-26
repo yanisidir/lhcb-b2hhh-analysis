@@ -233,11 +233,11 @@
       \]
       \begin{itemize}
         \item yields from \emph{separate fits}, not window counting
-        \item $N(\Bplus)=689 \pm 29$, $\chi^2/\mathrm{ndof}=1.67$
-        \item $N(\Bminus)=642 \pm 26$, $\chi^2/\mathrm{ndof}=1.13$
+        \item $N(\Bplus)=689 \pm 29$, toy fit p-value $0.035$
+        \item $N(\Bminus)=642 \pm 26$, toy fit p-value $0.43$
       \end{itemize}
       \begin{block}{Result}
-        $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.032\,\mathrm{(syst.)}$
+        $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.044\,\mathrm{(syst.)}$
       \end{block}
       {\footnotesize Raw: no detector, production, trigger or efficiency
       corrections; single magnet polarity.}
@@ -263,18 +263,19 @@
       \end{block}
       \begin{block}{Systematics}
         \begin{itemize}
-          \item fit model: $0.0085$
-          \item fit range: $0.0312$ (dominant)
+          \item model alone $0.031$, range alone $0.027$ (Barlow)
+          \item not independent: one low-mass shoulder in \Bplus{}
+          \item joint model $\times$ range envelope: $0.044$
         \end{itemize}
       \end{block}
     \end{column}
     \begin{column}{0.52\textwidth}
       \centering
       \includegraphics[width=0.95\textwidth]{systematic_breakdown.png}\\[0.15cm]
-      {\scriptsize Variations accepted only if both charge fits reach a valid
-      minimum with $\chi^2/\mathrm{ndof}<2.5$ --- criteria fixed in advance. The
-      double-Gaussian variations fail it: their wide component is degenerate
-      with the background.}
+      {\scriptsize Configurations accepted only if both charge fits reach a
+      valid minimum with $\chi^2/\mathrm{ndof}<2.5$ --- criteria fixed in
+      advance. All 20 model $\times$ range configurations pass; the range
+      sensitivity exists only for the nominal model.}
     \end{column}
   \end{columns}
 \end{frame}
@@ -284,23 +285,18 @@
   \begin{columns}[T,onlytextwidth]
     \begin{column}{0.43\textwidth}
       \begin{itemize}
-        \item Pairwise invariant masses:
+        \item Pair masses \(m_{ij}^2=(E_i+E_j)^2-|\vec{p}_i+\vec{p}_j|^2\)
+        \item Track labels carry no meaning: pairs found from the charges
+        \item Opposite-sign pairs, folded:
       \end{itemize}
       \[
-        m_{ij}^2=(E_i+E_j)^2-
-        |\vec{p}_i+\vec{p}_j|^2
+        m^2_{\mathrm{low}}(K^+K^-) \le m^2_{\mathrm{high}}(K^+K^-)
       \]
-      \begin{itemize}
-        \item \(m^2(K_1K_2)\)
-        \item \(m^2(K_2K_3)\)
-        \item \(m^2(K_1K_3)\)
-      \end{itemize}
-      {\small Useful for resonance and local CP studies.}
+      {\small Same coordinates for \(B^+\) and \(B^-\) under CP; the \(\phi(1020)\) band sits at \(m^2_{\mathrm{low}}\approx1.04~\mathrm{GeV}^2\).}
     \end{column}
     \begin{column}{0.55\textwidth}
       \centering
-      \includegraphics[width=0.49\textwidth]{dalitz_mK1K2_vs_mK2K3.png}
-      \includegraphics[width=0.49\textwidth]{dalitz_mK1K2_vs_mK1K3.png}
+      \includegraphics[width=\textwidth]{dalitz_density_all_selected.png}
     \end{column}
   \end{columns}
 \end{frame}
@@ -338,7 +334,7 @@
     \item Invariant-mass reconstruction under a kaon mass hypothesis.
     \item Shared selections and modular Python functions.
     \item Likelihood fits, toy validation, systematics and Dalitz diagnostics.
-    \item $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.032\,\mathrm{(syst.)}$, raw and uncorrected.
+    \item $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.044\,\mathrm{(syst.)}$, raw and uncorrected.
   \end{itemize}
 
   \vspace{0.5cm}

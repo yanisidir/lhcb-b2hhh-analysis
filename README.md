@@ -16,7 +16,7 @@ Python, `uproot`, `iminuit`, `scikit-learn`, LaTeX
 The raw charge asymmetry of $B^\pm \to h^\pm h^+ h^-$ candidates, extracted
 from independent fits to the $B^+$ and $B^-$ mass spectra:
 
-$$A_{\mathrm{raw}} = -0.0353 \pm 0.0290\,\mathrm{(stat.)} \pm 0.0323\,\mathrm{(syst.)}$$
+$$A_{\mathrm{raw}} = -0.0353 \pm 0.0290\,\mathrm{(stat.)} \pm 0.0437\,\mathrm{(syst.)}$$
 
 | Quantity | Value |
 | --- | --- |
@@ -25,10 +25,10 @@ $$A_{\mathrm{raw}} = -0.0353 \pm 0.0290\,\mathrm{(stat.)} \pm 0.0323\,\mathrm{(s
 | Fitted peak position | 5284.7 ± 0.6 MeV/$c^2$ |
 | Mass resolution | 19.5 ± 0.5 MeV/$c^2$ |
 | $N(B^+)$ / $N(B^-)$ | 689 ± 29 / 642 ± 26 |
-| $\chi^2/\mathrm{ndof}$ ($B^+$ / $B^-$) | 1.67 / 1.13 |
-| Systematics (model / range / total) | 0.0085 / 0.0312 / 0.0323 |
+| Goodness of fit, toy p-value ($B^+$ / $B^-$) | 0.035 / 0.43 |
+| Systematic (joint model × range envelope) | 0.0437, over 20 accepted configurations |
 | Toy-MC validation | 2000 toys, 0 failures, pull width 1.000, bias < 10⁻⁴ |
-| Local Dalitz diagnostic | 10×10 bins, 25 above threshold, max \|significance\| = 2.2 |
+| Local Dalitz diagnostic | 10×10 bins, 23 with ≥ 20 candidates, max \|significance\| = 2.3, global p = 0.40 |
 
 **This is a raw asymmetry, not a CP-violation measurement.** It is not corrected
 for detector-induced charge asymmetries, $B^+/B^-$ production asymmetry,
@@ -51,13 +51,14 @@ additionally require.
 | Fitting | Binned extended maximum-likelihood fit, pulls, fit-quality metrics | [`src/fitting/fit_mass.py`](src/fitting/fit_mass.py) |
 | Asymmetry | Raw asymmetry from fitted yields, with error propagation | [`src/fitting/asymmetry.py`](src/fitting/asymmetry.py) |
 | Acceptance | Criteria a variation must meet to define a systematic | [`src/fitting/acceptance.py`](src/fitting/acceptance.py) |
-| Dalitz kinematics | Pairwise invariant-mass-squared variables | [`src/physics/dalitz.py`](src/physics/dalitz.py) |
+| Dalitz kinematics | Charge-ordered $m^2_{\mathrm{low}}(K^+K^-)$, $m^2_{\mathrm{high}}(K^+K^-)$ | [`src/physics/dalitz.py`](src/physics/dalitz.py) |
 | Classification | Sideband-labelled Random Forest | [`src/ml/signal_background.py`](src/ml/signal_background.py) |
 
 Studies built on top of that: [charge-separated fits](scripts/run_charge_separated_fits.py),
 [toy-MC validation](studies/toy_mc/run_raw_asymmetry_toys.py),
 [fit-model](studies/systematics/run_fit_model_variations.py) and
-[fit-range](studies/systematics/run_fit_range_variations.py) systematics, and the
+[fit-range](studies/systematics/run_fit_range_variations.py) and
+[joint](studies/systematics/run_joint_variations.py) systematics, and the
 [local Dalitz asymmetry](studies/dalitz/run_local_raw_asymmetry.py).
 
 ## Results in detail
@@ -73,23 +74,43 @@ check on the reconstruction.
 Two modelling choices are worth stating, because they are where the analysis is
 weakest. The fit starts at 5200 MeV/$c^2$ to exclude a structure around
 5050–5150 MeV/$c^2$ — partially reconstructed and misidentified decays that the
-combinatorial model does not describe. And a common-mean **double Gaussian was
-tested and rejected as the nominal shape**: on this sample its wide component is
-degenerate with the combinatorial background, which it absorbs (fitted
-background 22 ± 34, narrow-core fraction undetermined at 0.17 ± 0.71 for
-$B^-$, minimum not valid). It is retained as a systematic variation instead.
+combinatorial model does not describe. And a common-mean **double Gaussian is
+not used as the nominal shape**: on this sample its wide component
+(σ ≈ 53 MeV/$c^2$) takes over the combinatorial background, whose fitted yield
+collapses to values compatible with zero (18 ± 19 for $B^+$, 7 ± 6 for $B^-$).
+It converges to a valid minimum once several starting points are tried, and is
+kept as a systematic variation.
+
+The nominal $B^+$ fit is marginal: its likelihood-ratio χ² has a toy p-value of
+0.035 (0.43 for $B^-$). The χ² computed on the observed counts drops empty bins
+and cannot be read off a χ² table here, so the p-value is taken from
+pseudo-experiments generated from the fitted model and refitted.
 
 ### Charge-separated fits and systematics
 
 The $B^+$ and $B^-$ spectra are fitted independently and the raw asymmetry is
-built from the fitted yields. Two systematic categories are evaluated by
-refitting: the mass-fit model and the fit range. A variation is only used if both
-charge fits converge with a valid minimum, positive yields and
-$\chi^2/\mathrm{ndof} < 2.5$; the two double-Gaussian variations fail that
-criterion and are reported as rejected. The fit range dominates the budget:
-moving the lower edge by 30 MeV/$c^2$ shifts the asymmetry by 0.031, about one
-statistical standard deviation, which is the honest measure of how much the
-low-mass contamination still matters.
+built from the fitted yields. The systematic comes from refitting with four mass
+models (single or double Gaussian, exponential or linear background) on five fit
+ranges. A configuration is only used if both charge fits converge with a valid
+minimum, positive yields and $\chi^2/\mathrm{ndof} < 2.5$; all 20 pass.
+
+The two sources are **not independent**, so they are not added in quadrature.
+Raising the lower fit edge from 5200 to 5230 MeV/$c^2$ shifts the asymmetry by
+0.031 with the nominal model — 2.1 times the 0.015 that the change of sample alone
+would produce, by Barlow's criterion, checked with toys — but by at most 0.006
+with any other model. The nominal exponential is steep enough to absorb a shoulder
+on the low-mass flank of the $B^+$ peak that $B^-$ does not show, and the other
+models attribute that shoulder differently. The systematic is therefore the
+largest shift from the nominal over the whole grid, 0.0437, reached by the
+double Gaussian on 5200–5550 MeV/$c^2$. The one-at-a-time shifts (model 0.031,
+range 0.027 after the Barlow correction) are kept as diagnostics.
+
+The nominal sits at the edge of that grid: 16 of the 19 other configurations give
+a more negative asymmetry. The budget is dominated by the unmodelled low-mass
+structure in $B^+$, and describing it explicitly is the first thing a real
+measurement would have to do.
+
+![Systematic grid](figures/joint_variations.png)
 
 ![Uncertainty budget](figures/systematic_breakdown.png)
 
@@ -106,13 +127,21 @@ propagation, not the detector modelling.
 ### Local asymmetry across the Dalitz plane
 
 Integrated asymmetries can hide larger local effects in multibody decays, since
-interference between resonant amplitudes varies across phase space. A bin-by-bin
-counting asymmetry is computed on a 10×10 grid over the candidates in the signal
-window 5245–5325 MeV/$c^2$, masking bins with fewer than 20 candidates (25 bins
-survive). The counting asymmetry over that window, −0.0416 ± 0.0275, agrees with
-the fit-based value. The largest local significance is 2.2, on 25 inspected bins
-and with no background subtraction, efficiency correction or look-elsewhere
-treatment — so no structure is claimed.
+interference between resonant amplitudes varies across phase space. The Dalitz
+coordinates are the two opposite-sign $K^+K^-$ masses, identified from the
+daughter charges and ordered low/high — the track labels in the ntuple carry no
+meaning, and these are the variables that map onto each other under CP, so a
+$B^+$ and a $B^-$ candidate in the same bin sit in the same region of phase space.
+The $\phi(1020)$ band at $m^2_{\mathrm{low}} \approx 1.04~\mathrm{GeV}^2/c^4$ is
+clearly visible.
+
+A bin-by-bin counting asymmetry is computed on a 10×10 grid over the candidates in
+the signal window 5245–5325 MeV/$c^2$, masking bins with fewer than 20 candidates
+(23 bins survive). The counting asymmetry over that window, −0.0416 ± 0.0275,
+agrees with the fit-based value. The largest local significance is 2.3; with 23
+bins inspected, the chance of at least one fluctuation that large with no local
+asymmetry at all is 0.40. With no background subtraction or efficiency correction
+on top of that, no structure is claimed.
 
 ![Local raw asymmetry](figures/local_A_raw_map.png)
 
@@ -145,6 +174,7 @@ python scripts/run_charge_separated_fits.py             # B+ / B- fits, raw asym
 python studies/toy_mc/run_raw_asymmetry_toys.py --n-toys 2000
 python studies/systematics/run_fit_model_variations.py
 python studies/systematics/run_fit_range_variations.py
+python studies/systematics/run_joint_variations.py      # model x range grid
 python studies/systematics/summarize_systematics.py     # uncertainty budget
 python studies/dalitz/run_local_raw_asymmetry.py        # local Dalitz diagnostic
 ```

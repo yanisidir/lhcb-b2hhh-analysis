@@ -275,15 +275,29 @@ def _uncertainties_from_minuit(
 
 
 def _fit_with_iminuit(nll, initial, limits, parameter_labels):
+    """Minimise with MIGRAD from every starting point and keep the best minimum.
+
+    The single-Gaussian model has one starting point. The double-Gaussian one
+    has a degenerate direction -- its wide component trades off against the
+    background -- so one start can stall on a ridge for one charge and not the
+    other. Trying several and keeping the lowest valid minimum means a
+    variation is judged on the model, not on where MIGRAD happened to begin.
+    """
     from iminuit import Minuit
 
-    minuit = Minuit(nll, **initial)
-    minuit.errordef = Minuit.LIKELIHOOD
-    for name, limit in limits.items():
-        minuit.limits[name] = limit
+    names = list(parameter_labels)
+    candidates = []
+    for start in _starting_points(initial, limits, names):
+        trial = Minuit(nll, **start)
+        trial.errordef = Minuit.LIKELIHOOD
+        for name, limit in limits.items():
+            trial.limits[name] = limit
+        trial.migrad()
+        trial.hesse()
+        candidates.append(trial)
 
-    minuit.migrad()
-    minuit.hesse()
+    valid = [trial for trial in candidates if trial.valid]
+    minuit = min(valid or candidates, key=lambda trial: trial.fval)
 
     values = {name: float(minuit.values[name]) for name in parameter_labels}
     uncertainties = _uncertainties_from_minuit(minuit.errors, parameter_labels)
@@ -296,6 +310,8 @@ def _fit_with_iminuit(nll, initial, limits, parameter_labels):
         "positive_definite_covariance": bool(getattr(fmin, "has_posdef_covar", False)),
         "edm": float(getattr(fmin, "edm", np.nan)),
         "nfcn": int(getattr(fmin, "nfcn", 0)),
+        "n_starting_points": len(candidates),
+        "n_valid_starting_points": len(valid),
         "message": "iminuit migrad completed",
     }
     return values, uncertainties, fit_status, float(minuit.fval)
@@ -355,7 +371,7 @@ def _clip_to_limits(value: float, limit: tuple[float | None, float | None]) -> f
     return value
 
 
-def _scipy_starting_points(initial, limits, names):
+def _starting_points(initial, limits, names):
     starts = [initial]
 
     if {"sigma_narrow", "sigma_wide", "signal_fraction"}.issubset(initial):
@@ -396,7 +412,7 @@ def _fit_with_scipy(nll, initial, limits, parameter_labels, background_model: st
         return nll(*x)
 
     results = []
-    for start in _scipy_starting_points(initial, limits, names):
+    for start in _starting_points(initial, limits, names):
         x0 = np.array([start[name] for name in names], dtype=float)
         results.append(minimize(objective, x0, method="L-BFGS-B", bounds=bounds))
 
@@ -443,15 +459,45 @@ def _fit_quality(
     chi2 = float(np.sum(pulls[valid] ** 2))
     ndof = int(np.count_nonzero(valid) - n_parameters)
     chi2_ndof = chi2 / ndof if ndof > 0 else None
+
+    # The chi2 above uses the observed counts as variances and drops empty bins,
+    # so it does not follow a chi2 distribution when many bins hold a handful of
+    # candidates, and its p-value cannot be read off a table. The likelihood-ratio
+    # chi2 (Baker & Cousins, NIM 221 (1984) 437) uses every bin, empty ones
+    # included, and is the one to quote a p-value for. It is reported alongside;
+    # acceptance criteria are still defined on chi2_ndof. Its asymptotic p-value
+    # is itself only approximate when bins hold few candidates -- too strict at a
+    # few per bin, too lenient when many bins are nearly empty -- so the p-value
+    # to quote comes from toys: see studies/toy_mc.
+    expected = np.clip(np.asarray(expected, dtype=float), 1.0e-12, None)
+    log_term = np.zeros_like(expected)
+    log_term[valid] = counts[valid] * np.log(counts[valid] / expected[valid])
+    chi2_lr = float(2.0 * np.sum(expected - counts + log_term))
+    ndof_lr = int(len(counts) - n_parameters)
+    p_value_lr = _chi2_survival(chi2_lr, ndof_lr) if ndof_lr > 0 else None
     return {
         "chi2": chi2,
         "ndof": ndof,
         "chi2_ndof": chi2_ndof,
         "n_fitted_bins": int(np.count_nonzero(valid)),
+        "chi2_likelihood_ratio": chi2_lr,
+        "ndof_likelihood_ratio": ndof_lr,
+        "p_value_likelihood_ratio_asymptotic": p_value_lr,
     }
 
 
-def _result_parameters(fit_values: Mapping[str, float], signal_model: str):
+def _chi2_survival(value: float, ndof: int) -> float:
+    from scipy.stats import chi2 as chi2_distribution
+
+    return float(chi2_distribution.sf(value, ndof))
+
+
+def _result_parameters(
+    fit_values: Mapping[str, float],
+    uncertainties: Mapping[str, float | None],
+    signal_model: str,
+):
+    """Return the reported parameters and the uncertainties that match them."""
     result = {
         "signal_yield": fit_values["signal_yield"],
         "background_yield": fit_values["background_yield"],
@@ -461,18 +507,29 @@ def _result_parameters(fit_values: Mapping[str, float], signal_model: str):
 
     if signal_model == "gaussian":
         result["mass_resolution"] = fit_values["sigma"]
-        return result
+        return result, dict(uncertainties)
 
+    uncertainties = dict(uncertainties)
     signal_fraction = fit_values["signal_fraction"]
     sigma_narrow = fit_values["sigma_narrow"]
     sigma_wide = fit_values["sigma_wide"]
     if sigma_narrow > sigma_wide:
         sigma_narrow, sigma_wide = sigma_wide, sigma_narrow
         signal_fraction = 1.0 - signal_fraction
+        # The two components are relabelled, so their uncertainties have to
+        # follow; leaving them in the fitted order would pair each reported
+        # width with the error of the other one.
+        uncertainties["mass_resolution_narrow"], uncertainties["mass_resolution_wide"] = (
+            uncertainties["mass_resolution_wide"],
+            uncertainties["mass_resolution_narrow"],
+        )
 
     effective_sigma = np.sqrt(
         signal_fraction * sigma_narrow**2 + (1.0 - signal_fraction) * sigma_wide**2
     )
+    # The effective width mixes three correlated parameters, so propagating its
+    # uncertainty needs the full covariance matrix, which is not stored here.
+    uncertainties.setdefault("mass_resolution", None)
     result.update(
         {
             "mass_resolution": float(effective_sigma),
@@ -481,7 +538,7 @@ def _result_parameters(fit_values: Mapping[str, float], signal_model: str):
             "signal_fraction": signal_fraction,
         }
     )
-    return result
+    return result, uncertainties
 
 
 def fit_mass_distribution(
@@ -545,7 +602,7 @@ def fit_mass_distribution(
         background_model=background_model,
     )
     fit_quality = _fit_quality(counts, expected, len(parameter_labels))
-    result = _result_parameters(fit_values, signal_model)
+    result, uncertainties = _result_parameters(fit_values, uncertainties, signal_model)
     result.update(
         {
             "signal_model": signal_model,

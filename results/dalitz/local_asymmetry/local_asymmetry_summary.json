@@ -3,9 +3,9 @@
   "data_path": "data/raw/B2HHH_MagnetDown.root",
   "selection": "src.physics.selection.prepare_selected_candidates",
   "dalitz_variables": {
-    "x": "m_K1K2_sq",
-    "y": "m_K2K3_sq",
-    "source": "src.physics.dalitz.compute_dalitz_variables"
+    "x": "m_KK_low_sq",
+    "y": "m_KK_high_sq",
+    "source": "src.physics.dalitz.compute_charge_ordered_dalitz_variables"
   },
   "charge_definition": "total_charge = H1_Charge + H2_Charge + H3_Charge",
   "mass_window": [
@@ -17,29 +17,29 @@
   "min_count": 20,
   "x_edges": [
     0.9802757944209576,
-    2.994474453432155,
-    5.0086731124433514,
-    7.0228717714545486,
-    9.037070430465747,
-    11.051269089476943,
-    13.06546774848814,
-    15.079666407499339,
-    17.093865066510535,
-    19.10806372552173,
-    21.122262384532927
+    2.2534914162913084,
+    3.526707038161659,
+    4.79992266003201,
+    6.07313828190236,
+    7.3463539037727115,
+    8.619569525643062,
+    9.892785147513413,
+    11.166000769383764,
+    12.439216391254115,
+    13.712432013124467
   ],
   "y_edges": [
-    1.0762872378520965,
-    3.250407512631607,
-    5.424527787411117,
-    7.5986480621906285,
-    9.772768336970138,
-    11.94688861174965,
-    14.12100888652916,
-    16.29512916130867,
-    18.46924943608818,
-    20.64336971086769,
-    22.817489985647203
+    3.164960272963524,
+    5.1354674354580885,
+    7.1059745979526525,
+    9.076481760447217,
+    11.04698892294178,
+    13.017496085436346,
+    14.98800324793091,
+    16.958510410425472,
+    18.92901757292004,
+    20.8995247354146,
+    22.870031897909165
   ],
   "n_candidates": 1323,
   "n_candidates_plus": 689,
@@ -47,8 +47,9 @@
   "global_counting_A_raw": -0.04157218442932729,
   "global_counting_sigma_A_raw": 0.027469102459551052,
   "n_bins_total": 100,
-  "n_bins_passing_min_count": 25,
-  "n_bins_masked_low_count": 75,
-  "max_abs_significance_passing_bins": 2.1737065119284154,
+  "n_bins_passing_min_count": 23,
+  "n_bins_masked_low_count": 77,
+  "max_abs_significance_passing_bins": 2.2883102141894214,
+  "global_p_value_of_max_significance": 0.40217583903264364,
   "caveat": "Raw local asymmetry diagnostic only; no corrections are applied for detector efficiency, background contamination, production asymmetry, migration across Dalitz bins, or phase-space acceptance."
 }

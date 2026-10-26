@@ -25,9 +25,14 @@ fraction need not be the same for the two charges.
 
 The fitted spectra are shown in Fig.~\ref{fig:charge_fit_plus} and
 Fig.~\ref{fig:charge_fit_minus}. Both fits converge to a valid minimum with a
-positive-definite covariance matrix, and give
-$\chi^2/\mathrm{ndof}=1.67$ for the \Bplus{} sample and
-$\chi^2/\mathrm{ndof}=1.13$ for the \Bminus{} sample. The fitted signal yields
+positive-definite covariance matrix. Goodness of fit is judged with the
+likelihood-ratio $\chi^2$ of Baker and Cousins~\cite{bakercousins}, which uses every bin including
+the empty ones. With many bins holding only a few candidates, its asymptotic
+$\chi^2$ distribution does not hold --- the asymptotic p-value for \Bplus{} is
+$0.18$ --- so the p-value is taken from the $2000$ pseudo-experiments of the
+toy study below, each refitted: $p = 0.035 \pm 0.004$ for \Bplus{} and
+$p = 0.43 \pm 0.01$ for \Bminus{}. The \Bplus{} description is therefore
+marginal, at about two standard deviations. The fitted signal yields
 are
 \begin{align}
   N(\Bplus) &= 689.1 \pm 28.6, \\
@@ -67,10 +72,10 @@ After including the systematic variations described below, the result is
 \begin{equation}
   A_{\mathrm{raw}} =
   -0.0353 \pm 0.0290~\mathrm{(stat.)}
-  \pm 0.0323~\mathrm{(syst.)},
+  \pm 0.0437~\mathrm{(syst.)},
   \label{eq:raw_asymmetry_result}
 \end{equation}
-that is, compatible with zero at the level of $0.8$ standard deviations of the
+that is, compatible with zero at the level of $0.7$ standard deviations of the
 total uncertainty.
 
 This is a raw asymmetry, not a physical CP-asymmetry measurement. It still
@@ -115,41 +120,45 @@ and it cannot detect a bias caused by the model itself being wrong.
 
 \subsection{Systematic uncertainties}
 
-Two systematic categories are evaluated for the raw asymmetry: the choice of
-mass-fit model and the choice of invariant-mass fit range. In both cases,
-alternative fits are accepted only if the \Bplus{} and \Bminus{} fits converge to
-a valid minimum, the fitted yields and yield uncertainties are positive, and the
-$\chi^2/\mathrm{ndof}$ values remain below $2.5$ for both charge-separated mass
-spectra. These criteria were fixed before the variations were run.
+Two analysis choices are varied: the mass-fit model and the invariant-mass fit
+range. A configuration is accepted only if the \Bplus{} and \Bminus{} fits
+converge to a valid minimum, the fitted yields and yield uncertainties are
+positive, and the $\chi^2/\mathrm{ndof}$ values remain below $2.5$ for both
+charge-separated spectra. These criteria were fixed before the variations were
+run. Because the double-Gaussian model has a nearly degenerate direction, each
+fit is started from several points and the lowest valid minimum is kept; with a
+single starting point the double-Gaussian fits failed to converge for one charge
+and were rejected for that reason alone.
 
-The fit-model study compares the nominal single Gaussian plus exponential model
-with a single Gaussian plus finite-range linear background, and with two
-double-Gaussian alternatives. The linear-background variation is accepted and
-shifts the raw asymmetry by $0.0085$, which is taken as the fit-model systematic
-uncertainty. Both double-Gaussian variations are rejected: as discussed in
-Sec.~\ref{sec:mass_fit}, their wide component is degenerate with the
-combinatorial background, and the \Bminus{} fit does not reach a valid minimum.
-Their shifts are reported in Fig.~\ref{fig:fit_model_systematic} for
-transparency, and they are large --- of order $0.045$ --- which is a direct
-statement of how much this measurement would depend on a signal shape that the
-present sample cannot constrain.
+\paragraph{One source at a time.} The fit-model study compares the nominal
+single Gaussian plus exponential model with a single Gaussian plus finite-range
+linear background and with two double-Gaussian alternatives. All three are
+accepted. The double-Gaussian variations shift the raw asymmetry by $-0.027$
+and $-0.031$: their wide component, $\sigma \approx 53~\mevcc$, takes over the
+combinatorial background, whose fitted yield falls to values compatible with
+zero. The largest shift, $0.031$, is the fit-model diagnostic
+(Fig.~\ref{fig:fit_model_systematic}).
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.82\textwidth]{fit_model_variations.png}
-  \caption{Raw asymmetry obtained with different charge-separated mass-fit models. Rejected variations are shown for comparison but are not used in the systematic assignment.}
+  \caption{Raw asymmetry obtained with different charge-separated mass-fit models on the nominal fit range.}
   \label{fig:fit_model_systematic}
 \end{figure}
 
-The fit-range study repeats the nominal fits for narrower and wider mass
-intervals. All tested variations pass the quality requirements. The largest
-accepted shift is $0.0312$, obtained when the lower edge is raised from $5200$ to
-$5230~\mevcc$, and is assigned as the fit-range systematic uncertainty. A shift
-of one statistical standard deviation for a $30~\mevcc$ change of the lower edge
-is the dominant weakness of this measurement: it says that the result still
-depends on how much of the low-mass shoulder enters the fit. Extending the model
-with a dedicated partially-reconstructed component, rather than excluding the
-region, is the natural next step.
+The fit-range study repeats the nominal fits for narrower and wider intervals.
+A change of range does not only change the analysis choice: it adds or removes
+candidates, and the two results would differ even with no systematic effect.
+The expected size of that statistical difference is
+$\sigma_{\mathrm{B}} = \sqrt{|\sigma_{\mathrm{var}}^2 - \sigma_{\mathrm{nom}}^2|}$
+(Barlow~\cite{barlow}), and only the part of a shift $\Delta$ beyond it,
+$\sqrt{\max(\Delta^2 - \sigma_{\mathrm{B}}^2, 0)}$, is evidence of a systematic
+effect. Raising the lower edge from $5200$ to $5230~\mevcc$ shifts the
+asymmetry by $\Delta = 0.031$ with $\sigma_{\mathrm{B}} = 0.015$; a toy study that
+fits the same pseudo-data on both ranges gives a spread of $0.0144 \pm 0.0004$
+and no mean shift, confirming the formula. The shift is $2.1\,\sigma_{\mathrm{B}}$,
+a genuine effect of the data, and its Barlow-corrected size, $0.027$, is the
+fit-range diagnostic (Fig.~\ref{fig:fit_range_systematic}).
 
 \begin{figure}[H]
   \centering
@@ -158,25 +167,46 @@ region, is the natural next step.
   \label{fig:fit_range_systematic}
 \end{figure}
 
-Table~\ref{tab:raw_asymmetry_uncertainties} summarizes the uncertainty
-components. The total systematic uncertainty is obtained by adding the
-fit-model and fit-range components in quadrature, which assumes they are
-independent. The total uncertainty, including statistics, is $0.0435$.
+\paragraph{Both sources together.} The two diagnostics cannot be added in
+quadrature, because they are not independent. Repeating every model on every
+range (Fig.~\ref{fig:joint_variations}) shows that the sensitivity to the lower
+edge belongs to the nominal model alone: with any other model, raising the edge
+to $5230~\mevcc$ moves the asymmetry by at most $0.006$. The nominal exponential
+is steep enough to absorb a shoulder on the low-mass flank of the \Bplus{} peak
+that the \Bminus{} spectrum does not show; narrowing the range removes that
+shoulder from the fit, while the other models attribute it to the signal or to a
+flatter background from the start. Both diagnostics are symptoms of the same
+unmodelled structure.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{joint_variations.png}
+  \caption{Shift of the raw asymmetry from the nominal for every combination of fit model and fit range. All 20 configurations pass the acceptance criteria.}
+  \label{fig:joint_variations}
+\end{figure}
+
+The systematic uncertainty is therefore taken as the largest shift from the
+nominal over all $20$ accepted configurations, $0.0437$, reached by the
+double-Gaussian model on $5200$--$5550~\mevcc$. This measures the joint variation
+directly instead of assuming a correlation. The range shifts inside it are not
+Barlow-corrected, so it is mildly conservative. The nominal also sits at the
+edge of the grid: $16$ of the $19$ other configurations give a more negative
+asymmetry.
 
 \begin{table}[H]
   \centering
-  \caption{Uncertainty components for the fitted raw asymmetry.}
+  \caption{Uncertainty components for the fitted raw asymmetry. The one-at-a-time diagnostics are not combined; the quoted systematic is the joint envelope.}
   \label{tab:raw_asymmetry_uncertainties}
   \begin{tabular}{lc}
     \toprule
     Source & Uncertainty on $A_{\mathrm{raw}}$ \\
     \midrule
     Statistical & 0.0290 \\
-    Fit-model systematic & 0.0085 \\
-    Fit-range systematic & 0.0312 \\
-    Total systematic & 0.0323 \\
+    Fit model alone (diagnostic) & 0.0305 \\
+    Fit range alone, Barlow-corrected (diagnostic) & 0.0273 \\
+    Systematic, joint model $\times$ range envelope & 0.0437 \\
     \midrule
-    Total & 0.0435 \\
+    Total & 0.0525 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -184,15 +214,17 @@ independent. The total uncertainty, including statistics, is $0.0435$.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.72\textwidth]{systematic_breakdown.png}
-  \caption{Breakdown of the statistical uncertainty, individual systematic components, and total systematic uncertainty on the raw asymmetry.}
+  \caption{Statistical uncertainty, the two one-at-a-time diagnostics, and the joint systematic envelope on the raw asymmetry.}
   \label{fig:systematic_breakdown}
 \end{figure}
 
-The dominant systematic contribution comes from the fit range, followed by the
-background-model variation. These studies probe only a limited set of analysis
-choices. Signal-shape variations that the present statistics can support,
-magnet-polarity comparisons, a control channel, and detector-efficiency
-corrections would all be required before interpreting the raw asymmetry as a
-corrected CP observable.
+The systematic now exceeds the statistical uncertainty, and it is dominated by a
+single feature of the data: the low-mass structure in the \Bplus{} spectrum,
+which no tested model describes. Modelling it explicitly --- a
+partially-reconstructed or misidentified component fitted over a wider range,
+rather than excluded --- is the first step a real measurement would need. Beyond
+that, signal-shape variations constrained by simulation, magnet-polarity
+comparisons, a control channel and detector-efficiency corrections would all be
+required before interpreting the raw asymmetry as a corrected CP observable.
 
 \clearpage

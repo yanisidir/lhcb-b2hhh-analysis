@@ -1,15 +1,18 @@
 {
   "nominal_A_raw": -0.03526943671183539,
   "statistical_uncertainty": 0.029043570218278723,
-  "fit_model_systematic": 0.008540778092254592,
-  "fit_range_systematic": 0.031167662893415056,
-  "total_systematic_uncertainty": 0.032316684555484615,
-  "total_uncertainty": 0.043449937533704054,
-  "report_text": "A_raw = -0.03527 +/- 0.02904 (stat.) +/- 0.03232 (syst.)",
+  "fit_model_systematic": 0.030535393032552254,
+  "fit_range_systematic": 0.02727464719699954,
+  "quadrature_if_independent": 0.040942845618901914,
+  "total_systematic_uncertainty": 0.04369801417765055,
+  "systematic_definition": "Largest |A_raw - A_raw(nominal)| over every accepted fit-model x fit-range configuration. It replaces the quadrature sum of the one-at-a-time model and range shifts, which are not independent on this sample. The range shifts inside it are not Barlow-corrected, so it is mildly conservative.",
+  "total_uncertainty": 0.0524694712580014,
+  "report_text": "A_raw = -0.03527 +/- 0.02904 (stat.) +/- 0.04370 (syst.)",
   "inputs": {
     "raw_asymmetry": "results/fits/charge_separated/raw_asymmetry.json",
     "fit_model_summary": "results/systematics/fit_model_summary.json",
-    "fit_range_summary": "results/systematics/fit_range_summary.json"
+    "fit_range_summary": "results/systematics/fit_range_summary.json",
+    "joint_summary": "results/systematics/joint_variations_summary.json"
   },
-  "notes": "Total systematic and total uncertainties are computed by adding independent uncertainty components in quadrature. The quoted asymmetry is raw and is not corrected for detector, production, trigger, reconstruction, or selection-induced charge asymmetries."
+  "notes": "The systematic is the largest shift over the accepted joint fit-model x fit-range configurations; the one-at-a-time model and range shifts are reported as diagnostics and not combined, because they are not independent. Statistical and systematic uncertainties are added in quadrature for the total. The quoted asymmetry is raw and is not corrected for detector, production, trigger, reconstruction, or selection-induced charge asymmetries."
 }

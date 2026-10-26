@@ -40,7 +40,25 @@
     5600.0
   ],
   "bins": 80,
+  "signal_model": "gaussian",
+  "background_model": "exponential",
   "random_seed": 12345,
   "baseline_dir": "results/fits/charge_separated",
-  "note": "Toy-MC validation generated from the nominal charge-separated mass model. This validates the statistical machinery only, not detector-level systematics."
+  "note": "Toy-MC validation generated from the nominal charge-separated mass model. This validates the statistical machinery only, not detector-level systematics.",
+  "goodness_of_fit": {
+    "plus": {
+      "observed_chi2_likelihood_ratio": 86.30630535162803,
+      "toy_p_value": 0.0345,
+      "toy_p_value_uncertainty": 0.004081038470781671,
+      "number_of_toys": 2000,
+      "asymptotic_p_value": 0.17508017953912827
+    },
+    "minus": {
+      "observed_chi2_likelihood_ratio": 62.8131531362239,
+      "toy_p_value": 0.426,
+      "toy_p_value_uncertainty": 0.01105721483918984,
+      "number_of_toys": 2000,
+      "asymptotic_p_value": 0.841217170502374
+    }
+  }
 }

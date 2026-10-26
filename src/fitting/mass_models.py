@@ -320,21 +320,21 @@ def signal_background_density(
     else:
         if sigma_wide is None:
             raise ValueError("sigma_wide is required for the double-Gaussian signal model.")
-        signal_density = double_gaussian_pdf(
-            mass[in_range],
-            mean,
-            sigma,
-            sigma_wide,
-            signal_fraction,
-        )
-        signal_norm = (
-            signal_fraction * (_gaussian_cdf(high, mean, sigma) - _gaussian_cdf(low, mean, sigma))
-            + (1.0 - signal_fraction)
-            * (_gaussian_cdf(high, mean, sigma_wide) - _gaussian_cdf(low, mean, sigma_wide))
-        )
-        if signal_norm <= 0:
+        if not 0.0 <= signal_fraction <= 1.0:
+            raise ValueError("signal_fraction must lie between 0 and 1.")
+        # Each component is normalized inside the fit range on its own, exactly
+        # as ``double_gaussian_bin_probabilities`` does, so that this density is
+        # the same shape the binned fit uses and ``signal_fraction`` keeps its
+        # meaning: the narrow-core fraction *within* the fitted interval.
+        narrow_norm = _gaussian_cdf(high, mean, sigma) - _gaussian_cdf(low, mean, sigma)
+        wide_norm = _gaussian_cdf(high, mean, sigma_wide) - _gaussian_cdf(low, mean, sigma_wide)
+        if narrow_norm <= 0 or wide_norm <= 0:
             raise ValueError("Double-Gaussian normalization is not positive in fit_range.")
-        signal_density = signal_density / signal_norm
+        signal_density = (
+            signal_fraction * gaussian_pdf(mass[in_range], mean, sigma) / narrow_norm
+            + (1.0 - signal_fraction)
+            * gaussian_pdf(mass[in_range], mean, sigma_wide) / wide_norm
+        )
 
     background_density = background_pdf(
         mass[in_range],

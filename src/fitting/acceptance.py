@@ -60,3 +60,32 @@ def fit_quality_acceptance(row: Mapping, max_chi2_ndof: float = DEFAULT_MAX_CHI2
         reasons.append("stress-test model, not accepted for systematic assignment")
 
     return len(reasons) == 0, "; ".join(reasons) if reasons else ""
+
+
+def barlow_shift(delta, sigma_variation, sigma_nominal) -> dict:
+    """Separate a variation's shift from the statistical spread it must have.
+
+    When a variation is fitted on a subset or a superset of the nominal sample,
+    as for a change of fit range, the two results differ even with no
+    systematic effect at all, because the candidates they do not share
+    fluctuate. The expected size of that difference is
+    ``sqrt(|sigma_variation^2 - sigma_nominal^2|)`` (R. Barlow, "Systematic
+    errors: facts and fictions", hep-ex/0207026). Only the part of the shift
+    beyond it is evidence of a systematic effect, so the contribution assigned
+    is ``sqrt(max(delta^2 - sigma_barlow^2, 0))``.
+
+    This does not apply to model variations fitted on the same candidates, whose
+    difference has no such statistical component.
+    """
+    if delta is None or sigma_variation is None or sigma_nominal is None:
+        return {"sigma_barlow": None, "barlow_significance": None, "barlow_corrected_shift": None}
+
+    sigma_barlow = float(np.sqrt(abs(float(sigma_variation) ** 2 - float(sigma_nominal) ** 2)))
+    delta = abs(float(delta))
+    significance = delta / sigma_barlow if sigma_barlow > 0 else None
+    corrected = float(np.sqrt(max(delta**2 - sigma_barlow**2, 0.0)))
+    return {
+        "sigma_barlow": sigma_barlow,
+        "barlow_significance": significance,
+        "barlow_corrected_shift": corrected,
+    }

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -15,7 +16,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.physics.dalitz import compute_dalitz_variables
+from src.physics.dalitz import (
+    OPPOSITE_SIGN_HIGH,
+    OPPOSITE_SIGN_LOW,
+    compute_charge_ordered_dalitz_variables,
+    compute_dalitz_variables,
+)
 from src.physics.selection import prepare_selected_candidates
 from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
 from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
@@ -23,8 +29,11 @@ from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "dalitz" / "local_asymmetry"
 DEFAULT_MASS_WINDOW = (5245.0, 5325.0)
-DEFAULT_X_VAR = "m_K1K2_sq"
-DEFAULT_Y_VAR = "m_K2K3_sq"
+# The opposite-sign K+K- pair masses, folded low/high. They are the variables
+# that map onto each other under CP, so a B+ and a B- candidate in the same
+# bin sit in the same region of phase space.
+DEFAULT_X_VAR = OPPOSITE_SIGN_LOW
+DEFAULT_Y_VAR = OPPOSITE_SIGN_HIGH
 CAVEAT = (
     "Raw local asymmetry diagnostic only; no corrections are applied for detector "
     "efficiency, background contamination, production asymmetry, migration across "
@@ -75,10 +84,13 @@ def load_selected_with_dalitz(
 
     missing = {x_var, y_var}.difference(selected.columns)
     if missing:
-        dalitz = compute_dalitz_variables(selected)
-        for column in dalitz.columns:
-            if column not in selected.columns:
-                selected[column] = dalitz[column]
+        for dalitz in (
+            compute_charge_ordered_dalitz_variables(selected),
+            compute_dalitz_variables(selected),
+        ):
+            for column in dalitz.columns:
+                if column not in selected.columns:
+                    selected[column] = dalitz[column]
 
     missing = {x_var, y_var}.difference(selected.columns)
     if missing:
@@ -200,6 +212,8 @@ def _axis_label(variable: str) -> str:
         "m_K1K2_sq": r"$m^2(K_1K_2)$ [GeV$^2/c^4$]",
         "m_K2K3_sq": r"$m^2(K_2K_3)$ [GeV$^2/c^4$]",
         "m_K1K3_sq": r"$m^2(K_1K_3)$ [GeV$^2/c^4$]",
+        OPPOSITE_SIGN_LOW: r"$m^2_{\mathrm{low}}(K^+K^-)$ [GeV$^2/c^4$]",
+        OPPOSITE_SIGN_HIGH: r"$m^2_{\mathrm{high}}(K^+K^-)$ [GeV$^2/c^4$]",
     }
     return labels.get(variable, variable)
 
@@ -243,6 +257,28 @@ def _plot_heatmap(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
+
+
+def write_density_map(candidates, output_path: Path, x_var: str, y_var: str, bins: int = 60):
+    """Write the Dalitz density of every selected candidate, both charges together."""
+    x_low, x_high = _finite_range(candidates[x_var].to_numpy())
+    y_low, y_high = _finite_range(candidates[y_var].to_numpy())
+    counts, x_edges, y_edges = np.histogram2d(
+        candidates[x_var].to_numpy(),
+        candidates[y_var].to_numpy(),
+        bins=(np.linspace(x_low, x_high, bins + 1), np.linspace(y_low, y_high, bins + 1)),
+    )
+    _plot_heatmap(
+        np.where(counts > 0, counts, np.nan),
+        x_edges,
+        y_edges,
+        output_path,
+        x_var,
+        y_var,
+        title="Dalitz density, all selected candidates",
+        colorbar_label="Candidates",
+        cmap="viridis",
+    )
 
 
 def write_plots(result, output_dir: Path, x_var: str, y_var: str, min_count: int):
@@ -293,6 +329,21 @@ def write_plots(result, output_dir: Path, x_var: str, y_var: str, min_count: int
     )
 
 
+def global_p_value_of_largest_significance(max_abs_significance, n_bins: int):
+    """Probability that the largest of ``n_bins`` local |significances| is this big.
+
+    Under the no-asymmetry hypothesis each bin's significance is approximately
+    a unit Gaussian, and the bins are independent, so the chance that at least
+    one of them reaches ``max_abs_significance`` is 1 - (1 - p_local)^n_bins,
+    with p_local the two-sided Gaussian tail. This is the number to read off a
+    scan of many bins; the local significance alone overstates it.
+    """
+    if max_abs_significance is None or n_bins <= 0:
+        return None
+    p_local = math.erfc(float(max_abs_significance) / math.sqrt(2.0))
+    return float(1.0 - (1.0 - p_local) ** n_bins)
+
+
 def build_summary(
     candidates,
     result,
@@ -325,7 +376,7 @@ def build_summary(
         "dalitz_variables": {
             "x": x_var,
             "y": y_var,
-            "source": "src.physics.dalitz.compute_dalitz_variables",
+            "source": "src.physics.dalitz.compute_charge_ordered_dalitz_variables",
         },
         "charge_definition": "total_charge = H1_Charge + H2_Charge + H3_Charge",
         "mass_window": None if mass_window is None else [float(v) for v in mass_window],
@@ -347,6 +398,10 @@ def build_summary(
         "n_bins_passing_min_count": int(np.sum(passing)),
         "n_bins_masked_low_count": int(np.sum(~passing)),
         "max_abs_significance_passing_bins": max_abs_significance,
+        "global_p_value_of_max_significance": global_p_value_of_largest_significance(
+            max_abs_significance,
+            int(np.count_nonzero(passing)),
+        ),
         "caveat": CAVEAT,
     }
 
@@ -423,7 +478,11 @@ def main():
         raise FileNotFoundError(f"Input ROOT file not found: {data_path}")
 
     mass_window = None if args.no_mass_window else tuple(float(v) for v in args.mass_window)
-    candidates = load_selected_with_dalitz(data_path, args.x_var, args.y_var, mass_window)
+    all_selected = load_selected_with_dalitz(data_path, args.x_var, args.y_var, mass_window=None)
+    if mass_window is None:
+        candidates = all_selected
+    else:
+        candidates = all_selected.loc[all_selected["B_mass"].between(*mass_window)].copy()
     result = compute_local_asymmetry(
         candidates,
         x_var=args.x_var,
@@ -455,6 +514,8 @@ def main():
     )
     write_json(summary_path, summary)
     write_plots(result, output_dir, args.x_var, args.y_var, args.min_count)
+    density_path = output_dir / "dalitz_density_all_selected.png"
+    write_density_map(all_selected, density_path, args.x_var, args.y_var)
 
     print(f"Selected finite Dalitz candidates: {len(candidates):,}")
     print(f"B+ candidates:                   {summary['n_candidates_plus']:,}")
@@ -472,6 +533,7 @@ def main():
     print(f"Wrote {display_path(output_dir / 'local_A_raw_map.png')}")
     print(f"Wrote {display_path(output_dir / 'local_significance_map.png')}")
     print(f"Wrote {display_path(output_dir / 'local_counts_map.png')}")
+    print(f"Wrote {display_path(density_path)}")
 
 
 if __name__ == "__main__":

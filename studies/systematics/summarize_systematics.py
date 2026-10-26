@@ -29,6 +29,9 @@ DEFAULT_FIT_MODEL_SUMMARY_PATH = (
 DEFAULT_FIT_RANGE_SUMMARY_PATH = (
     PROJECT_ROOT / "results" / "systematics" / "fit_range_summary.json"
 )
+DEFAULT_JOINT_SUMMARY_PATH = (
+    PROJECT_ROOT / "results" / "systematics" / "joint_variations_summary.json"
+)
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "systematics"
 
 
@@ -58,7 +61,14 @@ def _report_text(
     )
 
 
-def build_summary(raw_asymmetry, fit_model_summary, fit_range_summary):
+def build_summary(raw_asymmetry, fit_model_summary, fit_range_summary, joint_summary):
+    """Combine the statistical and systematic uncertainties on the raw asymmetry.
+
+    The systematic is the joint model x range envelope. The one-at-a-time
+    model and range shifts are kept as diagnostics but not combined: they are
+    not independent on this sample, so their quadrature sum would understate
+    the joint variation by an amount the data do not let us control.
+    """
     nominal_a_raw = float(raw_asymmetry["A_raw"])
     statistical_uncertainty = _finite_uncertainty(
         raw_asymmetry.get("sigma_A_raw"),
@@ -73,9 +83,11 @@ def build_summary(raw_asymmetry, fit_model_summary, fit_range_summary):
         "fit-range systematic",
     )
 
-    total_systematic_uncertainty = float(
-        np.hypot(fit_model_systematic, fit_range_systematic)
+    total_systematic_uncertainty = _finite_uncertainty(
+        joint_summary.get("recommended_fit_systematic"),
+        "joint fit-model x fit-range systematic",
     )
+    quadrature_if_independent = float(np.hypot(fit_model_systematic, fit_range_systematic))
     total_uncertainty = float(
         np.hypot(statistical_uncertainty, total_systematic_uncertainty)
     )
@@ -85,7 +97,9 @@ def build_summary(raw_asymmetry, fit_model_summary, fit_range_summary):
         "statistical_uncertainty": statistical_uncertainty,
         "fit_model_systematic": fit_model_systematic,
         "fit_range_systematic": fit_range_systematic,
+        "quadrature_if_independent": quadrature_if_independent,
         "total_systematic_uncertainty": total_systematic_uncertainty,
+        "systematic_definition": joint_summary.get("systematic_definition"),
         "total_uncertainty": total_uncertainty,
         "report_text": _report_text(
             nominal_a_raw,
@@ -96,10 +110,14 @@ def build_summary(raw_asymmetry, fit_model_summary, fit_range_summary):
             "raw_asymmetry": str(display_path(DEFAULT_RAW_ASYMMETRY_PATH)),
             "fit_model_summary": str(display_path(DEFAULT_FIT_MODEL_SUMMARY_PATH)),
             "fit_range_summary": str(display_path(DEFAULT_FIT_RANGE_SUMMARY_PATH)),
+            "joint_summary": str(display_path(DEFAULT_JOINT_SUMMARY_PATH)),
         },
         "notes": (
-            "Total systematic and total uncertainties are computed by adding "
-            "independent uncertainty components in quadrature. The quoted "
+            "The systematic is the largest shift over the accepted joint fit-model x "
+            "fit-range configurations; the one-at-a-time model and range shifts are "
+            "reported as diagnostics and not combined, because they are not "
+            "independent. Statistical and systematic uncertainties are added in "
+            "quadrature for the total. The quoted "
             "asymmetry is raw and is not corrected for detector, production, "
             "trigger, reconstruction, or selection-induced charge asymmetries."
         ),
@@ -112,6 +130,7 @@ def write_summary_csv(summary, output_path: Path):
         ("statistical_uncertainty", summary["statistical_uncertainty"]),
         ("fit_model_systematic", summary["fit_model_systematic"]),
         ("fit_range_systematic", summary["fit_range_systematic"]),
+        ("quadrature_if_independent", summary["quadrature_if_independent"]),
         ("total_systematic_uncertainty", summary["total_systematic_uncertainty"]),
         ("total_uncertainty", summary["total_uncertainty"]),
     ]
@@ -132,9 +151,9 @@ def write_breakdown_plot(summary, output_path: Path):
 
     labels = [
         "Statistical",
-        "Fit model",
-        "Fit range",
-        "Total systematic",
+        "Fit model\n(alone)",
+        "Fit range\n(alone)",
+        "Systematic\n(joint envelope)",
     ]
     values = np.array(
         [
@@ -152,7 +171,7 @@ def write_breakdown_plot(summary, output_path: Path):
     x = np.arange(len(values))
     ax.bar(x, values, color=colors, width=0.62)
     ax.set_xticks(x)
-    ax.set_xticklabels(labels, rotation=20, ha="right")
+    ax.set_xticklabels(labels)
     ax.set_ylabel(r"Uncertainty on $A_{\rm raw}$")
     ax.set_title("Raw-asymmetry uncertainty breakdown")
     ax.grid(True, axis="y", alpha=0.25)
@@ -187,6 +206,12 @@ def parse_args():
         help="Input fit-range systematic summary JSON.",
     )
     parser.add_argument(
+        "--joint-summary",
+        type=Path,
+        default=DEFAULT_JOINT_SUMMARY_PATH,
+        help="Input joint fit-model x fit-range summary JSON.",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
@@ -200,17 +225,20 @@ def main():
     raw_asymmetry_path = args.raw_asymmetry.resolve()
     fit_model_summary_path = args.fit_model_summary.resolve()
     fit_range_summary_path = args.fit_range_summary.resolve()
+    joint_summary_path = args.joint_summary.resolve()
     output_dir = args.output_dir.resolve()
 
     raw_asymmetry = _load_json(raw_asymmetry_path)
     fit_model_summary = _load_json(fit_model_summary_path)
     fit_range_summary = _load_json(fit_range_summary_path)
+    joint_summary = _load_json(joint_summary_path)
 
-    summary = build_summary(raw_asymmetry, fit_model_summary, fit_range_summary)
+    summary = build_summary(raw_asymmetry, fit_model_summary, fit_range_summary, joint_summary)
     summary["inputs"] = {
         "raw_asymmetry": str(display_path(raw_asymmetry_path)),
         "fit_model_summary": str(display_path(fit_model_summary_path)),
         "fit_range_summary": str(display_path(fit_range_summary_path)),
+        "joint_summary": str(display_path(joint_summary_path)),
     }
 
     output_dir.mkdir(parents=True, exist_ok=True)

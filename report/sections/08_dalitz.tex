@@ -1,51 +1,35 @@
 \section{Dalitz Plot Analysis}
 
-\subsection{Pairwise invariant masses}
+\subsection{Charge-ordered Dalitz variables}
 
-Three-body decays contain more kinematic information than a single reconstructed parent mass. The internal phase-space structure can be studied using pairwise invariant masses. For three daughter tracks labelled $K_1$, $K_2$, and $K_3$, the Dalitz variables used in this project are
-\begin{align}
-  m^2(K_1K_2), \qquad
-  m^2(K_2K_3), \qquad
-  m^2(K_1K_3).
-\end{align}
-Only two of these variables are independent for a fixed parent mass, but plotting different pairs is useful for visual inspection and for checking symmetries or structures involving different track orderings.
-
-The pair mass is computed by summing the two daughter four-vectors:
+Three-body decays contain more kinematic information than a single reconstructed parent mass. The internal phase-space structure is studied with pairwise invariant masses,
 \begin{equation}
   m_{ij}^2 =
   \left(E_i + E_j\right)^2
   -
-  \left|\vec{p}_i + \vec{p}_j\right|^2 .
+  \left|\vec{p}_i + \vec{p}_j\right|^2 ,
 \end{equation}
-As in the B-mass reconstruction, each daughter is assigned the kaon mass hypothesis. The resulting squared masses are reported in \gevfour{} to keep the numerical axis scales readable.
+with each daughter assigned the kaon mass hypothesis and the squared masses reported in \gevfour{}.
 
-\subsection{Dalitz distributions and resonance structure}
+The three tracks of a candidate carry labels $H_1$, $H_2$, $H_3$ in the ntuple, but these labels have no physical meaning: they are not ordered by charge. A $B^+ \to K^+K^+K^-$ candidate has two opposite-sign pairs, $K^+K^-$, and one same-sign pair, $K^+K^+$. Pair masses built directly from the labels, such as $m^2(H_1H_2)$, therefore mix same-sign and opposite-sign pairs from one candidate to the next, and do not define a fixed region of phase space. They are not usable for a comparison of $B^+$ and $B^-$.
 
-A Dalitz plot displays the density of selected events in a two-dimensional plane of pairwise invariant-mass-squared variables. Resonant two-body substructures can appear as bands, while interference and phase-space effects can produce non-uniform densities. In a complete amplitude analysis, these structures would be modelled with coherent sums of resonant and non-resonant amplitudes. The present analysis restricts itself to visualising the distributions.
+The opposite-sign pairs are instead identified from the daughter charges, as the two pairs that contain the track whose charge is opposite to the total. Because the two same-sign kaons are identical particles, the plane is folded by ordering the two opposite-sign masses,
+\begin{equation}
+  m^2_{\mathrm{low}}(K^+K^-) \le m^2_{\mathrm{high}}(K^+K^-) .
+\end{equation}
+These coordinates do not depend on the track labelling, and they are the ones that map onto each other under CP: the $K^-K^+$ pairs of the conjugate $B^-$ decay. A $B^+$ and a $B^-$ candidate in the same bin then sit in the same region of phase space, which is what a bin-by-bin asymmetry requires. Both properties are covered by unit tests.
 
-The density maps below use all selected candidates, without a mass window; the local asymmetry study of Sec.~\ref{sec:local_dalitz} restricts itself to the signal region. Figure~\ref{fig:dalitz_12_23} shows the distribution in the $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ plane. The use of a two-dimensional histogram rather than a raw scatter plot makes dense regions easier to read.
+\subsection{Dalitz distribution}
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.78\textwidth]{dalitz_mK1K2_vs_mK2K3.png}
-  \caption{Dalitz density map in the $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ plane.}
-  \label{fig:dalitz_12_23}
-\end{figure}
+A Dalitz plot displays the density of selected events in the plane of two pair-mass-squared variables. Resonant two-body substructures appear as bands, while interference and phase-space effects produce non-uniform densities. In a complete amplitude analysis these structures would be modelled with coherent sums of resonant and non-resonant amplitudes; the present analysis restricts itself to visualising the distribution.
 
-Figures~\ref{fig:dalitz_12_13} and~\ref{fig:dalitz_23_13} show the complementary pairings. Together, these projections provide a first view of the three-body phase-space population after the baseline selection.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.78\textwidth]{dalitz_mK1K2_vs_mK1K3.png}
-  \caption{Dalitz density map in the $m^2(K_1K_2)$ versus $m^2(K_1K_3)$ plane.}
-  \label{fig:dalitz_12_13}
-\end{figure}
+Figure~\ref{fig:dalitz_density} shows all selected candidates, without a mass window; the local asymmetry study of Sec.~\ref{sec:local_dalitz} restricts itself to the signal region. The narrow $\phi(1020) \to K^+K^-$ band at $m^2_{\mathrm{low}} \approx 1.04~\gevfour$ is clearly visible, which is a check that the opposite-sign pairs are correctly identified: with label-based pairs the band is diluted across the three combinations.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.78\textwidth]{dalitz_mK2K3_vs_mK1K3.png}
-  \caption{Dalitz density map in the $m^2(K_2K_3)$ versus $m^2(K_1K_3)$ plane.}
-  \label{fig:dalitz_23_13}
+  \includegraphics[width=0.78\textwidth]{dalitz_density_all_selected.png}
+  \caption{Dalitz density of all selected candidates in the charge-ordered $m^2_{\mathrm{low}}(K^+K^-)$ versus $m^2_{\mathrm{high}}(K^+K^-)$ plane.}
+  \label{fig:dalitz_density}
 \end{figure}
 
 Dalitz plots are especially relevant for CP-violation studies in multibody decays. Even if the integrated raw asymmetry is small, local asymmetries in restricted phase-space regions can be larger. This motivates a first bin-by-bin diagnostic of charge-dependent structures across the Dalitz plane.
@@ -57,7 +41,7 @@ The local diagnostic uses the candidates of the signal region, $5245 < m(hhh) < 
 \begin{equation}
   q_{\mathrm{tot}} = q_1 + q_2 + q_3 .
 \end{equation}
-The $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ plane is then divided into regular two-dimensional bins. In each bin $(i,j)$, the raw asymmetry is computed directly from candidate counts,
+The $m^2_{\mathrm{low}}(K^+K^-)$ versus $m^2_{\mathrm{high}}(K^+K^-)$ plane is then divided into regular two-dimensional bins. In each bin $(i,j)$, the raw asymmetry is computed directly from candidate counts,
 \begin{equation}
   A_{\mathrm{raw}}^{ij}
   =
@@ -65,20 +49,24 @@ The $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ plane is then divided into regular two-di
 \end{equation}
 where $N_+^{ij}$ and $N_-^{ij}$ are the numbers of \Bplus{} and \Bminus{} candidates in that Dalitz bin. The statistical uncertainty is estimated from binomial counting propagation, and a local significance is formed as $A_{\mathrm{raw}}^{ij}/\sigma(A_{\mathrm{raw}}^{ij})$.
 
-The default study uses a $10\times10$ binning and masks bins with fewer than 20 candidates in the asymmetry and significance maps. The bin contents are still stored in the numerical output, but low-statistics regions are not interpreted visually. With this threshold, 25 out of 100 bins pass the requirement. The direct counting asymmetry over the whole window is
+The default study uses a $10\times10$ binning and masks bins with fewer than 20 candidates in the asymmetry and significance maps. The bin contents are still stored in the numerical output, but low-statistics regions are not interpreted visually. With this threshold, 23 out of 100 bins pass the requirement; about half of the grid lies outside the folded kinematic region and is empty by construction. The direct counting asymmetry over the whole window is
 \begin{equation}
   A_{\mathrm{raw}} = -0.0416 \pm 0.0275 ,
 \end{equation}
 consistent with the fit-based value of Eq.~\ref{eq:raw_asymmetry_fit}, as it should be: the two use the same candidates, one subtracting the fitted background and the other not. The counting value does not correct for detector efficiency, phase-space acceptance, bin migration, production asymmetry, or detector-induced charge asymmetries.
 
-The largest local significance over the 25 populated bins is $2.2$. With 25 bins inspected, a fluctuation of that size is expected in a sample with no local asymmetry at all, so this diagnostic shows no evidence of local structure --- the expected outcome at this sample size. The published LHCb study of local asymmetries in this channel uses a far larger dataset and a finer binning of the Dalitz plane~\cite{lhcb3body}.
+The largest local significance over the 23 populated bins is $2.3$. Treating the bins as independent and each significance as a unit Gaussian under the no-asymmetry hypothesis, the probability that at least one of 23 bins fluctuates that far is
+\begin{equation}
+  p_{\mathrm{global}} = 1 - \left(1 - p_{\mathrm{local}}\right)^{23} = 0.40 ,
+\end{equation}
+so this diagnostic shows no evidence of local structure --- the expected outcome at this sample size. The published LHCb study of local asymmetries in this channel uses a far larger dataset and a finer binning of the Dalitz plane~\cite{lhcb3body}.
 
 Figure~\ref{fig:local_counts_map} shows the selected-candidate population used to define the local bins. The occupancy is highly non-uniform, reflecting both phase-space structure and the effect of the selection. This count map is essential context for interpreting the local asymmetry and significance maps.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.78\textwidth]{local_counts_map.png}
-  \caption{Selected-candidate counts in the $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ Dalitz plane.}
+  \caption{Selected-candidate counts in the charge-ordered $m^2_{\mathrm{low}}(K^+K^-)$ versus $m^2_{\mathrm{high}}(K^+K^-)$ Dalitz plane.}
   \label{fig:local_counts_map}
 \end{figure}
 
@@ -87,7 +75,7 @@ Figure~\ref{fig:local_a_raw_map} shows the local raw-asymmetry map after the min
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.78\textwidth]{local_A_raw_map.png}
-  \caption{Local raw-asymmetry map in the $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ Dalitz plane. Bins with fewer than 20 selected candidates are masked.}
+  \caption{Local raw-asymmetry map in the charge-ordered $m^2_{\mathrm{low}}(K^+K^-)$ versus $m^2_{\mathrm{high}}(K^+K^-)$ Dalitz plane. Bins with fewer than 20 selected candidates are masked.}
   \label{fig:local_a_raw_map}
 \end{figure}
 
@@ -96,7 +84,7 @@ Figure~\ref{fig:local_significance_map} shows the corresponding local counting s
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.78\textwidth]{local_significance_map.png}
-  \caption{Local raw-asymmetry significance in the $m^2(K_1K_2)$ versus $m^2(K_2K_3)$ Dalitz plane. Bins with fewer than 20 selected candidates are masked.}
+  \caption{Local raw-asymmetry significance in the charge-ordered $m^2_{\mathrm{low}}(K^+K^-)$ versus $m^2_{\mathrm{high}}(K^+K^-)$ Dalitz plane. Bins with fewer than 20 selected candidates are masked.}
   \label{fig:local_significance_map}
 \end{figure}
 

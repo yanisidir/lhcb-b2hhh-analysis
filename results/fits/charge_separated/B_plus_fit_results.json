@@ -17,7 +17,10 @@
     "chi2": 58.415838660888554,
     "ndof": 35,
     "chi2_ndof": 1.669023961739673,
-    "n_fitted_bins": 40
+    "n_fitted_bins": 40,
+    "chi2_likelihood_ratio": 86.30630535162803,
+    "ndof_likelihood_ratio": 75,
+    "p_value_likelihood_ratio_asymptotic": 0.17508017953912827
   },
   "fit_status": {
     "backend": "iminuit",
@@ -27,6 +30,8 @@
     "positive_definite_covariance": true,
     "edm": 8.458168778169129e-06,
     "nfcn": 183,
+    "n_starting_points": 1,
+    "n_valid_starting_points": 1,
     "message": "iminuit migrad completed",
     "negative_log_likelihood": -1992.260313719229,
     "n_candidates": 772,

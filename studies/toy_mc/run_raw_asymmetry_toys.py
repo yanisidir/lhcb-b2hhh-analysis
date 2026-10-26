@@ -115,17 +115,42 @@ def sample_signal_masses(rng, fit_result, n_signal: int, fit_range):
 
 
 def sample_background_masses(rng, fit_result, n_background: int, fit_range):
-    """Sample background masses from the finite-range exponential PDF."""
+    """Sample background masses from the fitted finite-range background PDF.
+
+    The shape is taken from ``fit_result["background_model"]``, so the toys are
+    generated from the same background the baseline fit used. The two models
+    parameterise ``background_slope`` differently -- MeV^-1 for the exponential,
+    dimensionless for the linear one -- so generating one with the other's
+    slope would silently produce the wrong sample.
+    """
     if n_background <= 0:
         return np.empty(0, dtype=float)
 
     low, high = fit_range
     width = high - low
     slope = float(fit_result["background_slope"])
+    background_model = fit_result.get("background_model", "exponential")
     u = rng.random(n_background)
-    if abs(slope) < 1.0e-12:
-        return low + width * u
-    return low + np.log1p(u * np.expm1(slope * width)) / slope
+
+    if background_model == "exponential":
+        if abs(slope) < 1.0e-12:
+            return low + width * u
+        return low + np.log1p(u * np.expm1(slope * width)) / slope
+
+    if background_model == "linear":
+        if abs(slope) > 1.0:
+            raise ValueError("Linear background slope must satisfy |slope| <= 1.")
+        # Invert CDF(t) = t + slope * (t^2 - t) on t = (m - low) / width, using
+        # the numerically stable root so that slope -> 0 degrades to t = u.
+        discriminant = (1.0 - slope) ** 2 + 4.0 * slope * u
+        denominator = (1.0 - slope) + np.sqrt(np.clip(discriminant, 0.0, None))
+        # The denominator only vanishes for slope = 1 at u = 0, where t = 0.
+        t = np.where(denominator > 0.0, 2.0 * u / np.where(denominator > 0.0, denominator, 1.0), 0.0)
+        return low + width * np.clip(t, 0.0, 1.0)
+
+    raise ValueError(
+        f"Unsupported background model for toy generation: {background_model!r}."
+    )
 
 
 def generate_toy_masses(rng, fit_result, fit_range):
@@ -159,9 +184,15 @@ def _failed_fit_result(message: str):
     }
 
 
-def _fit_toy_sample(masses, fit_range, bins: int, signal_model: str):
+def _fit_toy_sample(masses, fit_range, bins: int, signal_model: str, background_model: str):
     try:
-        return fit_mass_distribution(masses, fit_range=fit_range, bins=bins, signal_model=signal_model)
+        return fit_mass_distribution(
+            masses,
+            fit_range=fit_range,
+            bins=bins,
+            signal_model=signal_model,
+            background_model=background_model,
+        )
     except Exception as exc:
         return _failed_fit_result(f"{type(exc).__name__}: {exc}")
 
@@ -176,7 +207,16 @@ def _fit_success(fit_result):
     return bool(status.get("success")) and bool(status.get("valid"))
 
 
-def run_toy(toy_index: int, rng, plus_truth, minus_truth, fit_range, bins: int, signal_model: str):
+def run_toy(
+    toy_index: int,
+    rng,
+    plus_truth,
+    minus_truth,
+    fit_range,
+    bins: int,
+    signal_model: str,
+    background_model: str,
+):
     plus_masses, generated_signal_plus, generated_background_plus = generate_toy_masses(
         rng,
         plus_truth,
@@ -188,8 +228,8 @@ def run_toy(toy_index: int, rng, plus_truth, minus_truth, fit_range, bins: int, 
         fit_range,
     )
 
-    plus_fit = _fit_toy_sample(plus_masses, fit_range, bins, signal_model)
-    minus_fit = _fit_toy_sample(minus_masses, fit_range, bins, signal_model)
+    plus_fit = _fit_toy_sample(plus_masses, fit_range, bins, signal_model, background_model)
+    minus_fit = _fit_toy_sample(minus_masses, fit_range, bins, signal_model, background_model)
 
     injected_n_plus = float(plus_truth["signal_yield"])
     injected_n_minus = float(minus_truth["signal_yield"])
@@ -242,6 +282,8 @@ def run_toy(toy_index: int, rng, plus_truth, minus_truth, fit_range, bins: int, 
         "A_raw_pull": _safe_pull(fitted_a_raw, injected_a_raw, sigma_a_raw),
         "N_plus_pull": _safe_pull(fitted_n_plus, injected_n_plus, sigma_n_plus),
         "N_minus_pull": _safe_pull(fitted_n_minus, injected_n_minus, sigma_n_minus),
+        "chi2_likelihood_ratio_plus": plus_fit.get("fit_quality", {}).get("chi2_likelihood_ratio"),
+        "chi2_likelihood_ratio_minus": minus_fit.get("fit_quality", {}).get("chi2_likelihood_ratio"),
         "fit_success": plus_success and minus_success,
         "valid_for_pull_studies": valid_for_pull_studies,
         "fit_success_plus": plus_success,
@@ -303,7 +345,45 @@ def _toy_statistics(rows, injected_a_raw: float, valid_only: bool):
     }
 
 
-def summarize_toys(rows, injected_a_raw: float, seed: int, baseline_dir: Path, fit_range, bins: int):
+def goodness_of_fit_p_values(rows, plus_truth, minus_truth) -> dict:
+    """Toy-based p-values of the data's likelihood-ratio chi2, per charge.
+
+    The toys are generated from the fitted model and refitted, so the fraction
+    whose chi2 is at least the data's is the p-value with the fit itself and
+    the low-count bins accounted for, which the asymptotic chi2 formula is not.
+    """
+    result = {}
+    for label, truth in (("plus", plus_truth), ("minus", minus_truth)):
+        observed = truth.get("fit_quality", {}).get("chi2_likelihood_ratio")
+        toys = _finite_array(
+            [row for row in rows if row["fit_success"]],
+            f"chi2_likelihood_ratio_{label}",
+            valid_only=False,
+        )
+        if observed is None or len(toys) == 0:
+            result[label] = {"observed_chi2_likelihood_ratio": observed, "toy_p_value": None}
+            continue
+        n_above = int(np.count_nonzero(toys >= float(observed)))
+        result[label] = {
+            "observed_chi2_likelihood_ratio": float(observed),
+            "toy_p_value": n_above / len(toys),
+            "toy_p_value_uncertainty": float(np.sqrt(max(n_above, 1) * (len(toys) - n_above)) / len(toys) ** 1.5),
+            "number_of_toys": int(len(toys)),
+            "asymptotic_p_value": truth.get("fit_quality", {}).get("p_value_likelihood_ratio_asymptotic"),
+        }
+    return result
+
+
+def summarize_toys(
+    rows,
+    injected_a_raw: float,
+    seed: int,
+    baseline_dir: Path,
+    fit_range,
+    bins: int,
+    signal_model: str,
+    background_model: str,
+):
     n_failures = sum(not row["fit_success"] for row in rows)
     n_valid = sum(row["valid_for_pull_studies"] for row in rows)
 
@@ -318,6 +398,8 @@ def summarize_toys(rows, injected_a_raw: float, seed: int, baseline_dir: Path, f
         "valid_toys": _toy_statistics(rows, injected_a_raw, valid_only=True),
         "fit_range": list(fit_range),
         "bins": int(bins),
+        "signal_model": signal_model,
+        "background_model": background_model,
         "random_seed": seed,
         "baseline_dir": str(display_path(baseline_dir)),
         "note": (
@@ -432,6 +514,15 @@ def main():
         raise ValueError("--fit-range must be an increasing LOW HIGH interval.")
 
     signal_model = plus_truth["signal_model"]
+    background_model = plus_truth.get("background_model", "exponential")
+    if minus_truth["signal_model"] != signal_model or (
+        minus_truth.get("background_model", "exponential") != background_model
+    ):
+        raise ValueError(
+            "The B+ and B- baseline fits use different mass models; toys would "
+            "not reproduce the charge-separated analysis."
+        )
+
     injected_a_raw, _ = compute_raw_asymmetry(
         float(plus_truth["signal_yield"]),
         None,
@@ -444,7 +535,18 @@ def main():
     start_time = time.monotonic()
     progress_every = max(1, min(25, args.n_toys // 10))
     for toy_index in range(args.n_toys):
-        rows.append(run_toy(toy_index, rng, plus_truth, minus_truth, fit_range, bins, signal_model))
+        rows.append(
+            run_toy(
+                toy_index,
+                rng,
+                plus_truth,
+                minus_truth,
+                fit_range,
+                bins,
+                signal_model,
+                background_model,
+            )
+        )
         if (toy_index + 1) % progress_every == 0 or toy_index + 1 == args.n_toys:
             elapsed = time.monotonic() - start_time
             n_failures = sum(not row["fit_success"] for row in rows)
@@ -455,7 +557,18 @@ def main():
             )
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    summary = summarize_toys(rows, injected_a_raw, args.seed, baseline_dir, fit_range, bins)
+    goodness_of_fit = goodness_of_fit_p_values(rows, plus_truth, minus_truth)
+    summary = summarize_toys(
+        rows,
+        injected_a_raw,
+        args.seed,
+        baseline_dir,
+        fit_range,
+        bins,
+        signal_model,
+        background_model,
+    )
+    summary["goodness_of_fit"] = goodness_of_fit
     write_toy_results(rows, output_dir / "toy_results.csv")
     write_json(output_dir / "toy_summary.json", summary)
     write_plots(rows, output_dir, injected_a_raw)

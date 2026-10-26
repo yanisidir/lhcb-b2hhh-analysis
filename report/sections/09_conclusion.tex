@@ -32,11 +32,12 @@ Table~\ref{tab:summary} collects the quantitative results.
     \midrule
     $N(\Bplus)$ & $689.1 \pm 28.6$ \\
     $N(\Bminus)$ & $642.1 \pm 26.2$ \\
-    $A_{\mathrm{raw}}$ & $-0.0353 \pm 0.0290\,\mathrm{(stat.)} \pm 0.0323\,\mathrm{(syst.)}$ \\
+    Toy p-value of the \Bplus{} / \Bminus{} fits & $0.035$ / $0.43$ \\
+    $A_{\mathrm{raw}}$ & $-0.0353 \pm 0.0290\,\mathrm{(stat.)} \pm 0.0437\,\mathrm{(syst.)}$ \\
     \midrule
     Toy-MC pull width / bias & $0.9999$ / $<10^{-4}$ \\
     Counting asymmetry in the signal window & $-0.0416 \pm 0.0275$ \\
-    Largest local Dalitz significance (25 bins) & $2.2$ \\
+    Largest local Dalitz significance (23 bins) & $2.3$ (global $p = 0.40$) \\
     Classifier AUC (sideband labels) & $0.528$ \\
     \bottomrule
   \end{tabular}
@@ -49,15 +50,19 @@ zero within the quoted uncertainties, and the pseudo-experiments show that the
 statistical procedure and its uncertainty are correctly calibrated. Two results
 of this report are negative ones, and they are stated as such: the sideband
 Random Forest does not separate signal from background on this sample, and the
-double-Gaussian signal shape cannot be constrained by it.
+double-Gaussian signal shape cannot be constrained by it. A third finding
+qualifies the result itself: the fit-model and fit-range systematics are two
+symptoms of one unmodelled low-mass shoulder in the \Bplus{} spectrum, so the
+systematic is taken from the joint envelope of both variations and exceeds the
+statistical uncertainty.
 
 The analysis remains intentionally simplified and does not constitute a precision
 flavour-physics measurement. Several improvements would be required for a full
 experimental analysis:
 \begin{itemize}
   \item model the partially reconstructed and misidentified contributions below
-        $5200~\mevcc$ explicitly, instead of excluding that region, which is the
-        largest source of systematic uncertainty here;
+        $5200~\mevcc$ explicitly, instead of excluding that region; their tail
+        under the \Bplus{} peak drives the whole systematic budget here;
   \item combine the MagnetUp and MagnetDown samples to cancel charge-dependent
         detector effects, and use a control channel to remove production and
         detection asymmetries;
