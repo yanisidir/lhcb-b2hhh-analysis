@@ -1,18 +1,24 @@
 {
-  "N_plus": 689.0573745943661,
-  "sigma_N_plus": 28.56220139381395,
-  "N_minus": 642.107924330929,
-  "sigma_N_minus": 26.1955669349976,
-  "A_raw": -0.03526943671183539,
-  "sigma_A_raw": 0.029043570218278723,
+  "A_raw": -0.03208513502310789,
+  "sigma_A_raw": 0.021276620102096737,
+  "n_polarities": 2,
+  "by_polarity": {
+    "MagnetDown": {
+      "A_raw": -0.033714801981305165,
+      "sigma_A_raw": 0.02863893063109957
+    },
+    "MagnetUp": {
+      "A_raw": -0.030455468064910618,
+      "sigma_A_raw": 0.03147363824191374
+    }
+  },
   "fit_model_used": "gaussian + exponential",
   "fit_range": [
     5200.0,
     5600.0
   ],
-  "n_candidates_plus": 884,
-  "n_candidates_minus": 761,
-  "n_fitted_candidates_plus": 772,
-  "n_fitted_candidates_minus": 673,
-  "note": "Raw fitted-yield asymmetry only; no corrections for detector, production, trigger, reconstruction, or selection-induced charge asymmetries are applied."
+  "bins": 80,
+  "fit": "simultaneous B+/B- fit per polarity, shared shape parameters",
+  "combination": "equal-weight average over magnet polarities",
+  "note": "Raw fitted-yield asymmetry only; no corrections for detector, production, trigger, reconstruction, or selection-induced charge asymmetries are applied. Averaging the polarities cancels polarity-odd detection asymmetries to first order."
 }

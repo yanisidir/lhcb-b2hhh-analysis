@@ -66,34 +66,42 @@ Two choices define the nominal configuration, and both are worth stating
 explicitly because they are where this analysis is most fragile.
 
 \paragraph{Fitted interval.} The fit is performed over
-$5200 < m(hhh) < 5600~\mevcc$. The spectrum below $5200~\mevcc$ contains a
-broad structure around $5050$--$5150~\mevcc$, characteristic of partially
-reconstructed and misidentified $B$ decays, which the combinatorial background
-model does not describe. Including it produced a systematic trend in the fit
-residuals on both charge samples. Restricting the interval removes that trend at
-the cost of a shorter low-mass sideband.
+$5200 < m(hhh) < 5600~\mevcc$. The ntuple itself starts at $5050~\mevcc$, and
+the spectrum between $5050$ and about $5180~\mevcc$ holds a structure that the
+combinatorial background model does not describe. It is the same for the two
+charges, and it falls off at the kinematic limit $m_B - m_\pi \approx
+5140~\mevcc$ of a $B$ decay in which a pion is not reconstructed, smeared by the
+resolution: the signature of partially reconstructed decays. An ARGUS shape with
+that endpoint, convolved with the resolution, was tried over the full
+$5050$--$5600~\mevcc$ range, but the ntuple boundary leaves only the top of the
+shape visible and its curvature runs to the limit of its allowed range. Starting
+the fit at $5200~\mevcc$ removes the region at the cost of a shorter low-mass
+sideband.
 
 \paragraph{Signal shape.} The nominal signal shape is a single Gaussian. A
 common-mean double Gaussian was tested as the nominal shape, since detector-level
 mass peaks often show a narrow core with broader tails, but on this sample its
-wide component, $\sigma = 52 \pm 11~\mevcc$, takes over the combinatorial
-background: the fitted background yield falls from $114 \pm 17$ to $22 \pm 31$
-candidates, compatible with zero, and the uncertainty on the signal yield
-inflates from $39$ to $66$. The fit does reach a valid minimum, with a
-narrow-core fraction of $0.86 \pm 0.04$, once several starting points are tried,
-but with roughly $1.4\times10^3$ candidates and a truncated low-mass sideband
-the data cannot tell a broad resolution tail from the background. The double Gaussian is therefore used as a systematic variation
+wide component, $\sigma = 55 \pm 10~\mevcc$, takes over the combinatorial
+background: the fitted background yield falls from $180 \pm 21$ to $63 \pm 39$
+candidates, and the uncertainty on the signal yield inflates from $52$ to $63$.
+The fit does reach a valid minimum, with a narrow-core fraction of
+$0.91 \pm 0.03$, once several starting points are tried, but with a truncated
+low-mass sideband the data cannot tell a broad resolution tail from the
+background. The double Gaussian is therefore used as a systematic variation
 rather than as the nominal shape.
 
-The nominal fit is shown in Fig.~\ref{fig:mass_fit}. Of the $1645$ selected
-candidates, $1445$ fall inside the fitted interval. The results are
+The nominal fit of all selected candidates, both charges and both polarities
+together, is shown in Fig.~\ref{fig:mass_fit}. Of the $2939$ selected candidates
+($1645$ MagnetDown, $1294$ MagnetUp), $2573$ fall inside the fitted interval. The
+results are
 \begin{align}
-  N_s &= 1331 \pm 39, \\
-  N_b &= 114 \pm 17, \\
-  \mu &= 5284.7 \pm 0.6~\mevcc, \\
-  \sigma &= 19.5 \pm 0.5~\mevcc,
+  N_s &= 2394 \pm 52, \\
+  N_b &= 180 \pm 21, \\
+  \mu &= 5284.7 \pm 0.4~\mevcc, \\
+  \sigma &= 19.5 \pm 0.4~\mevcc,
 \end{align}
-with $\chi^2/\mathrm{ndof}=0.90$. The fitted peak position lies within a few
+with $\chi^2/\mathrm{ndof}=0.74$. Fitted separately, the two polarities give the
+same peak position and resolution within $0.1~\mevcc$. The fitted peak position lies within a few
 $\mevcc$ of the known $B^\pm$ mass~\cite{pdg}, which is the main closure check on
 the four-vector reconstruction and the mass hypothesis. The fitted resolution is
 a detector resolution convolved with the kaon mass hypothesis, not a measurement

@@ -24,7 +24,7 @@ from src.physics.dalitz import (
 )
 from src.physics.selection import prepare_selected_candidates
 from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
-from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
+from src.utils.io import DEFAULT_DATA_PATHS, display_path, json_safe, write_json
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "dalitz" / "local_asymmetry"
@@ -347,7 +347,7 @@ def global_p_value_of_largest_significance(max_abs_significance, n_bins: int):
 def build_summary(
     candidates,
     result,
-    data_path: Path,
+    data_paths,
     x_var: str,
     y_var: str,
     bins_x: int,
@@ -371,7 +371,8 @@ def build_summary(
 
     return {
         "study": "local Dalitz-plane raw asymmetry",
-        "data_path": str(display_path(data_path)),
+        "data_paths": {polarity: str(display_path(path)) for polarity, path in data_paths.items()},
+        "polarities": "pooled: both magnet polarities counted together",
         "selection": "src.physics.selection.prepare_selected_candidates",
         "dalitz_variables": {
             "x": x_var,
@@ -408,7 +409,13 @@ def build_summary(
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data", type=Path, default=DEFAULT_DATA_PATH, help="Input ROOT ntuple.")
+    parser.add_argument(
+        "--polarities",
+        nargs="+",
+        choices=tuple(DEFAULT_DATA_PATHS),
+        default=list(DEFAULT_DATA_PATHS),
+        help="Magnet polarities to pool.",
+    )
     parser.add_argument(
         "--output-dir",
         type=Path,
@@ -467,18 +474,30 @@ def parse_args():
 
 def main():
     args = parse_args()
-    data_path = args.data.resolve()
+    data_paths = {polarity: DEFAULT_DATA_PATHS[polarity] for polarity in args.polarities}
     output_dir = args.output_dir.resolve()
 
     if args.bins_x <= 0 or args.bins_y <= 0:
         raise ValueError("--bins-x and --bins-y must be positive.")
     if args.min_count < 0:
         raise ValueError("--min-count must be non-negative.")
-    if not data_path.exists():
-        raise FileNotFoundError(f"Input ROOT file not found: {data_path}")
+    for path in data_paths.values():
+        if not path.exists():
+            raise FileNotFoundError(f"Input ROOT file not found: {path}")
 
     mass_window = None if args.no_mass_window else tuple(float(v) for v in args.mass_window)
-    all_selected = load_selected_with_dalitz(data_path, args.x_var, args.y_var, mass_window=None)
+    import pandas as pd
+
+    # Both polarities are pooled: this is a counting diagnostic, and the two
+    # samples are of similar size, so pooling is close to the equal-weight
+    # average used for the fitted asymmetry.
+    all_selected = pd.concat(
+        [
+            load_selected_with_dalitz(path, args.x_var, args.y_var, mass_window=None).assign(polarity=polarity)
+            for polarity, path in data_paths.items()
+        ],
+        ignore_index=True,
+    )
     if mass_window is None:
         candidates = all_selected
     else:
@@ -498,13 +517,12 @@ def main():
     bins_path = output_dir / "local_asymmetry_bins.csv"
     summary_path = output_dir / "local_asymmetry_summary.json"
 
-    import pandas as pd
 
     pd.DataFrame(result["rows"]).to_csv(bins_path, index=False)
     summary = build_summary(
         candidates,
         result,
-        data_path=data_path,
+        data_paths=data_paths,
         x_var=args.x_var,
         y_var=args.y_var,
         bins_x=args.bins_x,

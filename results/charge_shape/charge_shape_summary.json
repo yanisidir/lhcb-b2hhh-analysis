@@ -1,0 +1,116 @@
+{
+  "study": "B+/B- mass-shape compatibility, per magnet polarity",
+  "fit_range": [
+    5200.0,
+    5600.0
+  ],
+  "bins": 80,
+  "random_seed": 2024,
+  "by_polarity": {
+    "MagnetDown": {
+      "shape_test_statistic": 8.229339791676466,
+      "n_shared_shape_parameters": 3,
+      "asymptotic_p_value": 0.041502267974457066,
+      "toy_p_value": 0.043,
+      "toy_p_value_uncertainty": 0.006414904519944158,
+      "number_of_toys": 1000,
+      "mean_toy_statistic": 3.0764301564970347,
+      "all_fits_valid": true,
+      "flank": [
+        5220.0,
+        5260.0
+      ],
+      "flank_observed": {
+        "plus": 105,
+        "minus": 56
+      },
+      "flank_expected_shared_shape": {
+        "plus": 91.12694311210444,
+        "minus": 72.83527237705813
+      },
+      "separate_fit_peak_position": {
+        "plus": [
+          5283.4702208633835,
+          0.8403720700375743
+        ],
+        "minus": [
+          5285.9236627166465,
+          0.7928263988669642
+        ]
+      },
+      "separate_fit_background_yield": {
+        "plus": [
+          82.98013309276072,
+          14.479306929204661
+        ],
+        "minus": [
+          30.957294686862888,
+          8.658472604905194
+        ]
+      },
+      "separate_fit_background_slope": {
+        "plus": [
+          -0.009508523742032204,
+          0.0013826568904107975
+        ],
+        "minus": [
+          -0.005977036419672111,
+          0.002072370134466481
+        ]
+      }
+    },
+    "MagnetUp": {
+      "shape_test_statistic": 4.201585295896621,
+      "n_shared_shape_parameters": 3,
+      "asymptotic_p_value": 0.2405032149633031,
+      "toy_p_value": 0.248,
+      "toy_p_value_uncertainty": 0.01365635383255721,
+      "number_of_toys": 1000,
+      "mean_toy_statistic": 3.043954732174636,
+      "all_fits_valid": true,
+      "flank": [
+        5220.0,
+        5260.0
+      ],
+      "flank_observed": {
+        "plus": 53,
+        "minus": 66
+      },
+      "flank_expected_shared_shape": {
+        "plus": 62.18916850826071,
+        "minus": 58.176487788234056
+      },
+      "separate_fit_peak_position": {
+        "plus": [
+          5285.640513463305,
+          0.8690998907841276
+        ],
+        "minus": [
+          5283.829533376259,
+          0.9186066186539392
+        ]
+      },
+      "separate_fit_background_yield": {
+        "plus": [
+          32.14206851949672,
+          8.529031681247906
+        ],
+        "minus": [
+          32.66465497898004,
+          9.253035292124299
+        ]
+      },
+      "separate_fit_background_slope": {
+        "plus": [
+          -0.003953372230926028,
+          0.0020589546811599583
+        ],
+        "minus": [
+          -0.007598994105803891,
+          0.0020755422502194065
+        ]
+      }
+    }
+  },
+  "note": "The flank window was chosen after looking at the MagnetDown spectrum, so its local significance overstates the evidence; MagnetUp is the independent test."
+}

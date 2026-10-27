@@ -8,13 +8,13 @@ shoulder in the B+ spectrum, and disappears with the other models. Adding the
 two one-at-a-time shifts in quadrature would therefore assume an independence
 the data contradict. This study refits every model on every fit range and
 assigns the largest shift from the nominal over the accepted configurations,
-which measures the joint variation directly.
+which measures the joint variation directly. Every configuration is fitted on
+both magnet polarities, simultaneously in charge, and averaged like the nominal.
 """
 
 from __future__ import annotations
 
 import argparse
-import csv
 import sys
 from pathlib import Path
 
@@ -25,92 +25,19 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.fitting.acceptance import fit_quality_acceptance, status_summary
-from src.fitting.asymmetry import raw_asymmetry
-from src.fitting.fit_mass import fit_mass_distribution
-from src.physics.selection import prepare_selected_candidates
+from src.fitting.acceptance import DEFAULT_MAX_CHI2_NDOF
+from src.physics.selection import load_charge_samples
 from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
-from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
-from studies.systematics.run_fit_model_variations import MODEL_VARIATIONS
-from studies.systematics.run_fit_range_variations import FIT_RANGE_VARIATIONS
+from src.utils.io import DEFAULT_DATA_PATHS, display_path, write_json
+from studies.systematics.configurations import (
+    FIT_RANGE_VARIATIONS,
+    evaluate_configuration,
+    implemented_models,
+    write_rows_csv,
+)
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "systematics"
-
-
-def implemented_models():
-    """Model variations the fitter supports; pending ones are skipped."""
-    return [variation for variation in MODEL_VARIATIONS if "pending_reason" not in variation]
-
-
-def _fit(masses, fit_range, bins: int, signal_model: str, background_model: str):
-    try:
-        return fit_mass_distribution(
-            masses,
-            fit_range=fit_range,
-            bins=bins,
-            signal_model=signal_model,
-            background_model=background_model,
-        )
-    except Exception as exc:
-        return {
-            "signal_yield": None,
-            "parameter_uncertainties": {"signal_yield": None},
-            "fit_quality": {"chi2_ndof": None},
-            "signal_model": signal_model,
-            "background_model": background_model,
-            "fit_status": {
-                "success": False,
-                "valid": False,
-                "backend": None,
-                "message": f"{type(exc).__name__}: {exc}",
-                "fit_range": list(fit_range),
-                "n_fitted_candidates": 0,
-            },
-        }
-
-
-def configuration_row(model, fit_range_variation, plus_masses, minus_masses, bins: int, max_chi2_ndof: float):
-    """Fit both charges in one model x range configuration and judge it."""
-    fit_range = fit_range_variation["fit_range"]
-    plus = _fit(plus_masses, fit_range, bins, model["signal_model"], model["background_model"])
-    minus = _fit(minus_masses, fit_range, bins, model["signal_model"], model["background_model"])
-
-    if plus["signal_yield"] is None or minus["signal_yield"] is None:
-        asymmetry = {"N_plus": None, "sigma_N_plus": None, "N_minus": None, "sigma_N_minus": None,
-                     "A_raw": None, "sigma_A_raw": None}
-    else:
-        asymmetry = raw_asymmetry(plus, minus, 0, 0)
-
-    plus_status = status_summary(plus)
-    minus_status = status_summary(minus)
-    row = {
-        "model_name": model["model_name"],
-        "signal_model": model["signal_model"],
-        "background_model": model["background_model"],
-        "range_name": fit_range_variation["range_name"],
-        "fit_range_low": fit_range[0],
-        "fit_range_high": fit_range[1],
-        "is_nominal": bool(
-            model["variation_role"] == "nominal" and fit_range_variation["is_nominal"]
-        ),
-        "N_plus": asymmetry["N_plus"],
-        "sigma_N_plus": asymmetry["sigma_N_plus"],
-        "N_minus": asymmetry["N_minus"],
-        "sigma_N_minus": asymmetry["sigma_N_minus"],
-        "A_raw": asymmetry["A_raw"],
-        "sigma_A_raw": asymmetry["sigma_A_raw"],
-        "chi2_ndof_plus": plus.get("fit_quality", {}).get("chi2_ndof"),
-        "chi2_ndof_minus": minus.get("fit_quality", {}).get("chi2_ndof"),
-        "fit_success_plus": plus_status["success"],
-        "fit_success_minus": minus_status["success"],
-        "fit_valid_plus": plus_status["valid"],
-        "fit_valid_minus": minus_status["valid"],
-    }
-    accepted, reason = fit_quality_acceptance(row, max_chi2_ndof)
-    row["accepted_for_systematic"] = accepted
-    row["rejection_reason"] = reason
-    return row
 
 
 def summarize(rows, bins: int, max_chi2_ndof: float):
@@ -163,14 +90,6 @@ def summarize(rows, bins: int, max_chi2_ndof: float):
     }
 
 
-def write_csv(rows, output_path: Path):
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(json_safe(row) for row in rows)
-
-
 def write_grid_plot(rows, models, ranges, nominal_a_raw: float, output_path: Path):
     configure_matplotlib_cache()
     import matplotlib
@@ -215,12 +134,11 @@ def write_grid_plot(rows, models, ranges, nominal_a_raw: float, output_path: Pat
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data", type=Path, default=DEFAULT_DATA_PATH, help="Input ROOT ntuple.")
     parser.add_argument("--bins", type=int, default=80, help="Number of fitted mass bins.")
     parser.add_argument(
         "--max-chi2-ndof",
         type=float,
-        default=2.5,
+        default=DEFAULT_MAX_CHI2_NDOF,
         help="Maximum chi2/ndof allowed for accepted configurations.",
     )
     parser.add_argument(
@@ -234,21 +152,14 @@ def parse_args():
 
 def main():
     args = parse_args()
-    data_path = args.data.resolve()
     output_dir = args.output_dir.resolve()
     if args.bins <= 0:
         raise ValueError("--bins must be positive.")
-    if not data_path.exists():
-        raise FileNotFoundError(f"Input ROOT file not found: {data_path}")
 
-    selected = prepare_selected_candidates(data_path)
-    total_charge = selected["H1_Charge"] + selected["H2_Charge"] + selected["H3_Charge"]
-    plus_masses = selected.loc[total_charge == 1, "B_mass"].to_numpy()
-    minus_masses = selected.loc[total_charge == -1, "B_mass"].to_numpy()
-
+    samples = load_charge_samples(DEFAULT_DATA_PATHS)
     models = implemented_models()
     rows = [
-        configuration_row(model, variation, plus_masses, minus_masses, args.bins, args.max_chi2_ndof)
+        evaluate_configuration(samples, model, variation, args.bins, args.max_chi2_ndof)
         for model in models
         for variation in FIT_RANGE_VARIATIONS
     ]
@@ -257,7 +168,7 @@ def main():
     csv_path = output_dir / "joint_variations.csv"
     summary_path = output_dir / "joint_variations_summary.json"
     plot_path = output_dir / "joint_variations.png"
-    write_csv(rows, csv_path)
+    write_rows_csv(rows, csv_path)
     write_json(summary_path, summary)
     write_grid_plot(rows, models, FIT_RANGE_VARIATIONS, summary["nominal_A_raw"], plot_path)
 
@@ -268,9 +179,8 @@ def main():
         f"Accepted A_raw envelope: [{summary['accepted_A_raw_min']:.5f}, {summary['accepted_A_raw_max']:.5f}]"
     )
     print(f"Recommended fit systematic: {summary['recommended_fit_systematic']:.6f}")
-    print(f"Wrote {display_path(csv_path)}")
-    print(f"Wrote {display_path(summary_path)}")
-    print(f"Wrote {display_path(plot_path)}")
+    for path in (csv_path, summary_path, plot_path):
+        print(f"Wrote {display_path(path)}")
 
 
 if __name__ == "__main__":

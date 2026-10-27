@@ -162,10 +162,10 @@
       \]
       \begin{itemize}
         \item extended binned likelihood, \textsc{Minuit}
-        \item $N_s = 1331 \pm 39$
-        \item $\mu = 5284.7 \pm 0.6~\mevcc$
-        \item $\sigma = 19.5 \pm 0.5~\mevcc$
-        \item $\chi^2/\mathrm{ndof} = 0.90$
+        \item both polarities, 2573 candidates
+        \item $N_s = 2394 \pm 52$
+        \item $\mu = 5284.7 \pm 0.4~\mevcc$
+        \item $\sigma = 19.5 \pm 0.4~\mevcc$
       \end{itemize}
       {\footnotesize Fitted from $5200~\mevcc$ up: below that lies a partially
       reconstructed structure the background model does not describe.}
@@ -232,50 +232,70 @@
              {N(\Bminus)+N(\Bplus)}
       \]
       \begin{itemize}
-        \item yields from \emph{separate fits}, not window counting
-        \item $N(\Bplus)=689 \pm 29$, toy fit p-value $0.035$
-        \item $N(\Bminus)=642 \pm 26$, toy fit p-value $0.43$
+        \item \(B^+\) and \(B^-\) fitted \emph{simultaneously}: shared shapes, own yields
+        \item \(A_{\mathrm{raw}}\) is a fit parameter
+        \item Down \(-0.034 \pm 0.029\), Up \(-0.031 \pm 0.032\)
+        \item equal-weight polarity average cancels left--right detection asymmetries
       \end{itemize}
       \begin{block}{Result}
-        $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.044\,\mathrm{(syst.)}$
+        $A_{\mathrm{raw}} = -0.032 \pm 0.021\,\mathrm{(stat.)} \pm 0.016\,\mathrm{(syst.)}$
       \end{block}
-      {\footnotesize Raw: no detector, production, trigger or efficiency
-      corrections; single magnet polarity.}
+      {\footnotesize Raw: no production, kaon-detection, trigger or efficiency
+      corrections.}
     \end{column}
     \begin{column}{0.51\textwidth}
       \centering
-      \includegraphics[width=0.98\textwidth]{B_minus_fit_plot.png}
+      \includegraphics[width=0.98\textwidth]{MagnetDown_B_plus_fit_plot.png}
     \end{column}
   \end{columns}
 \end{frame}
 % Speaker note: State explicitly that this is a raw diagnostic and not a publishable CP measurement.
+
+\begin{frame}{A Shoulder in One Spectrum: Real or Fluctuation?}
+  \centering
+  \includegraphics[width=0.92\textwidth]{low_mass_flank.png}\\[0.2cm]
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item MagnetDown \(B^+\): 105 candidates in 5220--5260 for 91 expected
+        \item shape test, toy-calibrated: \(p = 0.043\)
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{itemize}
+        \item independent MagnetUp: no excess, \(p = 0.25\)
+        \item a $\sim2\sigma$ fluctuation, which separate fits had absorbed into the \(B^+\) background
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+% Speaker note: The independent polarity is the decisive test; say that the window was chosen after looking, so the local p-value overstates it.
 
 \begin{frame}{Validation and Systematics}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{0.46\textwidth}
       \begin{block}{2000 toy experiments}
         \begin{itemize}
-          \item generated from the fitted model, refitted
-          \item pull width $0.9999$, bias $<10^{-4}$
+          \item both polarities generated, refitted, averaged
+          \item pull width $0.98$, bias $2.6\%$ of $\sigma$
           \item no fit failures
-          \item quoted statistical error is calibrated
+          \item goodness of fit: Down $p = 0.025$, Up $p = 0.30$
         \end{itemize}
       \end{block}
       \begin{block}{Systematics}
         \begin{itemize}
-          \item model alone $0.031$, range alone $0.027$ (Barlow)
-          \item not independent: one low-mass shoulder in \Bplus{}
-          \item joint model $\times$ range envelope: $0.044$
+          \item 4 models $\times$ 5 ranges, both polarities
+          \item envelope, not quadrature: $0.016$
+          \item range shifts all within $1.5\,\sigma_{\mathrm{Barlow}}$
         \end{itemize}
       \end{block}
     \end{column}
     \begin{column}{0.52\textwidth}
       \centering
       \includegraphics[width=0.95\textwidth]{systematic_breakdown.png}\\[0.15cm]
-      {\scriptsize Configurations accepted only if both charge fits reach a
-      valid minimum with $\chi^2/\mathrm{ndof}<2.5$ --- criteria fixed in
-      advance. All 20 model $\times$ range configurations pass; the range
-      sensitivity exists only for the nominal model.}
+      {\scriptsize Configurations accepted only if every fit reaches a valid
+      minimum with $\chi^2/\mathrm{ndof}<2.5$ per charge spectrum --- criteria
+      fixed in advance. All 20 pass; MagnetUp barely moves across the grid.}
     \end{column}
   \end{columns}
 \end{frame}
@@ -307,8 +327,8 @@
     \begin{column}{0.48\textwidth}
       \begin{block}{Current limitations}
         \begin{itemize}
-          \item raw asymmetry, no corrections
-          \item single magnet polarity
+          \item raw asymmetry: production and kaon detection uncorrected
+          \item momentum scale not calibrated per charge
           \item low-mass structure excluded, not modelled
           \item classifier does not separate
         \end{itemize}
@@ -317,9 +337,9 @@
     \begin{column}{0.48\textwidth}
       \begin{block}{Next steps}
         \begin{itemize}
-          \item model the partially reconstructed component
-          \item combine MagnetUp/MagnetDown
           \item control channel for production/detection asymmetries
+          \item per-charge momentum-scale calibration
+          \item partially reconstructed shape from simulation
           \item background subtraction per Dalitz bin
         \end{itemize}
       \end{block}
@@ -334,7 +354,7 @@
     \item Invariant-mass reconstruction under a kaon mass hypothesis.
     \item Shared selections and modular Python functions.
     \item Likelihood fits, toy validation, systematics and Dalitz diagnostics.
-    \item $A_{\mathrm{raw}} = -0.035 \pm 0.029\,\mathrm{(stat.)} \pm 0.044\,\mathrm{(syst.)}$, raw and uncorrected.
+    \item $A_{\mathrm{raw}} = -0.032 \pm 0.021\,\mathrm{(stat.)} \pm 0.016\,\mathrm{(syst.)}$, raw and uncorrected.
   \end{itemize}
 
   \vspace{0.5cm}

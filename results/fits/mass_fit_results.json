@@ -1,26 +1,26 @@
 {
-  "signal_yield": 1330.9078165879903,
-  "background_yield": 114.02548431312172,
-  "mass_mean": 5284.65618352381,
-  "background_slope": -0.008429896101214729,
-  "mass_resolution": 19.53359057912727,
+  "signal_yield": 2393.5771117703025,
+  "background_yield": 179.70502701842588,
+  "mass_mean": 5284.7035477156605,
+  "background_slope": -0.00735949190006725,
+  "mass_resolution": 19.482549287241547,
   "signal_model": "gaussian",
   "background_model": "exponential",
   "parameter_uncertainties": {
-    "signal_yield": 38.703698299706275,
-    "background_yield": 16.770060556645177,
-    "mass_mean": 0.5808991004305426,
-    "mass_resolution": 0.5133088868270974,
-    "background_slope": 0.0011333797695846446
+    "signal_yield": 51.53926691746301,
+    "background_yield": 21.02845566640748,
+    "mass_mean": 0.42801868714605007,
+    "mass_resolution": 0.36879430716504835,
+    "background_slope": 0.0008813218585719046
   },
   "fit_quality": {
-    "chi2": 37.61571963927856,
-    "ndof": 42,
-    "chi2_ndof": 0.8956123723637752,
-    "n_fitted_bins": 47,
-    "chi2_likelihood_ratio": 84.44545503795666,
+    "chi2": 37.125062601215035,
+    "ndof": 50,
+    "chi2_ndof": 0.7425012520243007,
+    "n_fitted_bins": 55,
+    "chi2_likelihood_ratio": 95.47483699742271,
     "ndof_likelihood_ratio": 75,
-    "p_value_likelihood_ratio_asymptotic": 0.2133213041782423
+    "p_value_likelihood_ratio_asymptotic": 0.05553839328332399
   },
   "fit_status": {
     "backend": "iminuit",
@@ -28,14 +28,14 @@
     "valid": true,
     "accurate_covariance": true,
     "positive_definite_covariance": true,
-    "edm": 8.3139795934299e-06,
-    "nfcn": 150,
+    "edm": 1.8998611159810456e-05,
+    "nfcn": 170,
     "n_starting_points": 1,
     "n_valid_starting_points": 1,
     "message": "iminuit migrad completed",
-    "negative_log_likelihood": -4726.721219281593,
-    "n_candidates": 1445,
-    "n_fitted_candidates": 1445,
+    "negative_log_likelihood": -9940.969266981085,
+    "n_candidates": 2573,
+    "n_fitted_candidates": 2573,
     "fit_range": [
       5200.0,
       5600.0
@@ -43,8 +43,23 @@
     "bins": 80,
     "n_parameters": 5
   },
-  "note": "First nominal mass fit with configurable Gaussian-family signal and finite-range background models; not yet a full systematic study.",
-  "data_path": "data/raw/B2HHH_MagnetDown.root",
+  "note": "Mass fit of all selected candidates, both charges and the listed polarities pooled.",
+  "data_paths": {
+    "MagnetDown": "data/raw/B2HHH_MagnetDown.root",
+    "MagnetUp": "data/raw/B2HHH_MagnetUp.root"
+  },
+  "candidate_counts": {
+    "MagnetDown": {
+      "read": 5135823,
+      "selected": 1645,
+      "in_fit_range": 1445
+    },
+    "MagnetUp": {
+      "read": 3420295,
+      "selected": 1294,
+      "in_fit_range": 1128
+    }
+  },
   "mass_column": "B_mass",
   "selection": "src.physics.selection.prepare_selected_candidates"
 }

@@ -8,6 +8,12 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "B2HHH_MagnetDown.root"
+# The two magnet polarities of the same data-taking period. The raw asymmetry is
+# averaged over them, so a polarity-odd detection asymmetry cancels.
+DEFAULT_DATA_PATHS = {
+    "MagnetDown": DEFAULT_DATA_PATH,
+    "MagnetUp": PROJECT_ROOT / "data" / "raw" / "B2HHH_MagnetUp.root",
+}
 
 
 def display_path(path: Path) -> Path:

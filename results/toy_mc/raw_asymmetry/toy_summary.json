@@ -1,39 +1,52 @@
 {
   "number_of_toys": 2000,
-  "injected_A_raw": -0.03526943671183539,
   "number_of_fit_failures": 0,
   "number_valid_for_pull_studies": 2000,
   "fit_failure_rate": 0.0,
-  "valid_for_pull_studies_rate": 1.0,
-  "all_toys": {
-    "number_of_toys": 2000,
-    "number_with_fitted_A_raw": 2000,
-    "mean_fitted_A_raw": -0.03527140440656633,
-    "injected_A_raw": -0.03526943671183539,
-    "bias": -1.9676947309379966e-06,
-    "std_fitted_A_raw": 0.02887716224708938,
-    "mean_fitted_uncertainty": 0.028887027648973333,
-    "mean_A_raw_pull": -0.002607838490755804,
-    "A_raw_pull_width": 0.9999003220004451,
-    "mean_N_plus_pull": 0.004209383612293243,
-    "N_plus_pull_width": 1.0080809230208612,
-    "mean_N_minus_pull": 0.0010429370853697647,
-    "N_minus_pull_width": 1.0355191028622124
+  "polarity_average": {
+    "injected_A_raw": -0.03208513502310789,
+    "mean_fitted_A_raw": -0.032627868756210446,
+    "bias": -0.0005427337331025545,
+    "std_fitted_A_raw": 0.02072826182016216,
+    "mean_fitted_uncertainty": 0.021223855290561665,
+    "mean_A_raw_pull": -0.02706574946654735,
+    "A_raw_pull_width": 0.9763480718821904
   },
-  "valid_toys": {
-    "number_of_toys": 2000,
-    "number_with_fitted_A_raw": 2000,
-    "mean_fitted_A_raw": -0.03527140440656633,
-    "injected_A_raw": -0.03526943671183539,
-    "bias": -1.9676947309379966e-06,
-    "std_fitted_A_raw": 0.02887716224708938,
-    "mean_fitted_uncertainty": 0.028887027648973333,
-    "mean_A_raw_pull": -0.002607838490755804,
-    "A_raw_pull_width": 0.9999003220004451,
-    "mean_N_plus_pull": 0.004209383612293243,
-    "N_plus_pull_width": 1.0080809230208612,
-    "mean_N_minus_pull": 0.0010429370853697647,
-    "N_minus_pull_width": 1.0355191028622124
+  "by_polarity": {
+    "MagnetDown": {
+      "injected_A_raw": -0.033714801981305165,
+      "mean_fitted_A_raw": -0.03424506106150169,
+      "bias": -0.0005302590801965282,
+      "std_fitted_A_raw": 0.028762776628054612,
+      "mean_fitted_uncertainty": 0.028528882954695297,
+      "mean_A_raw_pull": -0.02067561141273139,
+      "A_raw_pull_width": 1.008110184089584
+    },
+    "MagnetUp": {
+      "injected_A_raw": -0.030455468064910618,
+      "mean_fitted_A_raw": -0.0310106764509192,
+      "bias": -0.0005552083860085807,
+      "std_fitted_A_raw": 0.030462673172146404,
+      "mean_fitted_uncertainty": 0.0314266327659784,
+      "mean_A_raw_pull": -0.018528015691737062,
+      "A_raw_pull_width": 0.9699937355948904
+    }
+  },
+  "goodness_of_fit": {
+    "MagnetDown": {
+      "observed_chi2_likelihood_ratio": 157.34879827952872,
+      "ndof_likelihood_ratio": 153,
+      "toy_p_value": 0.0245,
+      "toy_p_value_uncertainty": 0.003456859123539749,
+      "number_of_toys": 2000
+    },
+    "MagnetUp": {
+      "observed_chi2_likelihood_ratio": 135.55263736297337,
+      "ndof_likelihood_ratio": 153,
+      "toy_p_value": 0.3015,
+      "toy_p_value_uncertainty": 0.010261524009619624,
+      "number_of_toys": 2000
+    }
   },
   "fit_range": [
     5200.0,
@@ -44,21 +57,5 @@
   "background_model": "exponential",
   "random_seed": 12345,
   "baseline_dir": "results/fits/charge_separated",
-  "note": "Toy-MC validation generated from the nominal charge-separated mass model. This validates the statistical machinery only, not detector-level systematics.",
-  "goodness_of_fit": {
-    "plus": {
-      "observed_chi2_likelihood_ratio": 86.30630535162803,
-      "toy_p_value": 0.0345,
-      "toy_p_value_uncertainty": 0.004081038470781671,
-      "number_of_toys": 2000,
-      "asymptotic_p_value": 0.17508017953912827
-    },
-    "minus": {
-      "observed_chi2_likelihood_ratio": 62.8131531362239,
-      "toy_p_value": 0.426,
-      "toy_p_value_uncertainty": 0.01105721483918984,
-      "number_of_toys": 2000,
-      "asymptotic_p_value": 0.841217170502374
-    }
-  }
+  "note": "Toys generated from each polarity's simultaneous B+/B- fit, refitted the same way and averaged over polarities. This validates the statistical machinery only, not detector-level systematics, and cannot detect a bias from the model itself being wrong."
 }

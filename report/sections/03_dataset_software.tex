@@ -5,24 +5,26 @@
 The project uses the CERN Open Data record \emph{Matter Antimatter Differences
 (B meson decays to three hadrons)}~\cite{b2hhhdata}, released by the LHCb
 collaboration in 2017 under a CC0 licence. The record contains three ROOT files
-with reconstructed $B$-candidate ntuples. The main file used throughout this
-report is
+with reconstructed $B$-candidate ntuples. The two data files,
 \begin{center}
-  \texttt{data/raw/B2HHH\_MagnetDown.root}.
+  \texttt{data/raw/B2HHH\_MagnetDown.root}, \qquad
+  \texttt{data/raw/B2HHH\_MagnetUp.root},
 \end{center}
-The two companion files, kept for extensions discussed in
-Sec.~\ref{sec:conclusion}, are
-\begin{center}
-  \texttt{B2HHH\_MagnetUp.root}, \qquad
-  \texttt{PhaseSpaceSimulation.root}.
-\end{center}
-The presence of both magnet polarities is important for realistic charge-asymmetry studies, because reversing the magnetic field helps control detector-induced left--right and charge-dependent reconstruction effects. The present report focuses on the MagnetDown sample for a compact demonstration.
+hold the same data-taking period recorded with the two polarities of the LHCb
+dipole magnet; the third, \texttt{PhaseSpaceSimulation.root}, is kept for the
+extensions discussed in Sec.~\ref{sec:conclusion}. Both polarities are used for
+the raw asymmetry. Reversing the magnetic field swaps the side of the detector
+towards which each charge is bent, so averaging the two polarities cancels
+left--right detection asymmetries to first order
+(Sec.~\ref{sec:cp}); MagnetUp also provides an independent sample on which a
+feature seen in MagnetDown can be checked. The selection, the classifier study and
+the exploratory notebooks were developed on MagnetDown.
 
 The data are stored in the ROOT format~\cite{root}, a standard file and object format in high-energy physics. The relevant event information is contained in a tree named \texttt{DecayTree}. A ROOT \texttt{TTree} stores columnar data: each branch corresponds to one observable, such as a momentum component, charge, PID response, vertex quality, or flight distance. This format is efficient for large event samples because only the branches needed for a given analysis step need to be read.
 
 \subsection{Python analysis workflow}
 
-The analysis is implemented as a Python workflow. Reusable functions live under \texttt{src/}; exploratory notebooks under \texttt{notebooks/}; the fit entry points under \texttt{scripts/}; and the toy-MC, systematic and Dalitz studies under \texttt{studies/}. Every study writes its numerical output as JSON and CSV under \texttt{results/}, so each number quoted in this report can be traced to the file that produced it. The main software components are listed in Table~\ref{tab:software}; they are drawn from the scientific Python stack~\cite{numpy,matplotlib} and from the Scikit-HEP ecosystem~\cite{scikithep}.
+The analysis is implemented as a Python workflow. Reusable functions live under \texttt{src/}; exploratory notebooks under \texttt{notebooks/}; the fit entry points under \texttt{scripts/}; and the toy-MC, systematic, charge-shape and Dalitz studies under \texttt{studies/}. Every study writes its numerical output as JSON and CSV under \texttt{results/}, so each number quoted in this report can be traced to the file that produced it. The main software components are listed in Table~\ref{tab:software}; they are drawn from the scientific Python stack~\cite{numpy,matplotlib} and from the Scikit-HEP ecosystem~\cite{scikithep}.
 
 \begin{table}[H]
   \centering

@@ -1,0 +1,75 @@
+{
+  "signal_model": "gaussian",
+  "background_model": "exponential",
+  "signal_yield": 1326.8548759121813,
+  "A_raw": -0.033714801981305165,
+  "sigma_A_raw": 0.02863893063109957,
+  "N_plus": 685.7947626557449,
+  "sigma_N_plus": 28.19955133295282,
+  "N_minus": 641.0601132564365,
+  "sigma_N_minus": 26.027484267622242,
+  "mass_mean": 5284.730840001204,
+  "mass_resolution": 19.41628847118052,
+  "background_slope": -0.008624533300230547,
+  "background_yield_plus": 86.33116483604472,
+  "background_yield_minus": 32.00976239611015,
+  "parameter_uncertainties": {
+    "signal_yield": 38.66100232230997,
+    "A_raw": 0.02863893063109957,
+    "mass_mean": 0.5792636444157324,
+    "mass_resolution": 0.5024906118224344,
+    "background_slope": 0.0011194814397216457,
+    "background_yield_plus": 13.985527131722705,
+    "background_yield_minus": 8.268753945150038
+  },
+  "fit_quality": {
+    "plus": {
+      "chi2": 59.574992180286586,
+      "ndof": 34,
+      "chi2_ndof": 1.7522056523613703,
+      "n_fitted_bins": 40,
+      "chi2_likelihood_ratio": 89.80854747506646,
+      "ndof_likelihood_ratio": 74,
+      "p_value_likelihood_ratio_asymptotic": 0.10188247262099193
+    },
+    "minus": {
+      "chi2": 45.46473290606798,
+      "ndof": 32,
+      "chi2_ndof": 1.4207729033146244,
+      "n_fitted_bins": 38,
+      "chi2_likelihood_ratio": 67.54025080446226,
+      "ndof_likelihood_ratio": 74,
+      "p_value_likelihood_ratio_asymptotic": 0.6886520749302948
+    },
+    "chi2_likelihood_ratio": 157.34879827952872,
+    "ndof_likelihood_ratio": 153
+  },
+  "fit_status": {
+    "backend": "iminuit",
+    "success": true,
+    "valid": true,
+    "accurate_covariance": true,
+    "positive_definite_covariance": true,
+    "edm": 5.9619054925280334e-05,
+    "nfcn": 212,
+    "n_starting_points": 1,
+    "n_valid_starting_points": 1,
+    "message": "iminuit migrad completed",
+    "negative_log_likelihood": -3733.5708342554,
+    "n_fitted_candidates_plus": 772,
+    "n_fitted_candidates_minus": 673,
+    "fit_range": [
+      5200.0,
+      5600.0
+    ],
+    "bins": 80,
+    "n_parameters": 7
+  },
+  "polarity": "MagnetDown",
+  "data_path": "data/raw/B2HHH_MagnetDown.root",
+  "mass_column": "B_mass",
+  "charge_definition": "total_charge = H1_Charge + H2_Charge + H3_Charge",
+  "selection": "src.physics.selection.prepare_selected_candidates",
+  "n_selected_plus": 884,
+  "n_selected_minus": 761
+}

@@ -2,6 +2,7 @@
 
 import pytest
 
+from src.fitting.acceptance import simultaneous_fit_acceptance
 from studies.systematics.run_joint_variations import summarize
 from studies.systematics.summarize_systematics import build_summary
 
@@ -55,3 +56,40 @@ def test_the_summary_quotes_the_joint_envelope_not_the_quadrature_sum():
     assert summary["total_systematic_uncertainty"] == pytest.approx(0.044)
     assert summary["quadrature_if_independent"] == pytest.approx((0.030**2 + 0.027**2) ** 0.5)
     assert summary["total_uncertainty"] == pytest.approx((0.029**2 + 0.044**2) ** 0.5)
+
+
+def _simultaneous_result(valid=True, chi2_plus=1.1, chi2_minus=1.2, n_plus=600.0, n_minus=580.0):
+    return {
+        "fit_status": {"success": valid, "valid": valid},
+        "fit_quality": {"plus": {"chi2_ndof": chi2_plus}, "minus": {"chi2_ndof": chi2_minus}},
+        "N_plus": n_plus,
+        "sigma_N_plus": 25.0,
+        "N_minus": n_minus,
+        "sigma_N_minus": 25.0,
+    }
+
+
+def test_healthy_simultaneous_fits_are_accepted():
+    accepted, reason = simultaneous_fit_acceptance(
+        {"MagnetDown": _simultaneous_result(), "MagnetUp": _simultaneous_result()}
+    )
+
+    assert accepted
+    assert reason == ""
+
+
+@pytest.mark.parametrize(
+    "overrides, expected",
+    [
+        ({"valid": False}, "MagnetUp: fit did not converge"),
+        ({"chi2_minus": 2.6}, "MagnetUp B- chi2/ndof >= 2.5"),
+        ({"n_plus": 0.0}, "MagnetUp B+ fitted yield is not positive"),
+    ],
+)
+def test_one_failing_polarity_rejects_the_configuration(overrides, expected):
+    accepted, reason = simultaneous_fit_acceptance(
+        {"MagnetDown": _simultaneous_result(), "MagnetUp": _simultaneous_result(**overrides)}
+    )
+
+    assert not accepted
+    assert expected in reason

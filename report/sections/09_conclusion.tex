@@ -5,9 +5,10 @@ This project implements a complete introductory HEP analysis chain on LHCb CERN
 Open Data. Starting from ROOT ntuples, the analysis reads selected branches with
 \texttt{uproot}, processes candidates with \texttt{pandas} and \texttt{numpy},
 reconstructs invariant masses, applies physics-motivated selections, fits the
-mass spectrum by binned maximum likelihood, separates the charge-conjugate
-samples, validates the statistical procedure with pseudo-experiments, evaluates
-two categories of systematic uncertainty, and examines the three-body phase space
+mass spectrum by binned maximum likelihood, fits the charge-conjugate samples of
+both magnet polarities simultaneously, validates the statistical procedure with
+pseudo-experiments, evaluates a joint model and fit-range systematic, tests the
+charge dependence of the mass shape, and examines the three-body phase space
 with Dalitz-plot distributions and a local asymmetry diagnostic.
 
 Table~\ref{tab:summary} collects the quantitative results.
@@ -16,56 +17,62 @@ Table~\ref{tab:summary} collects the quantitative results.
   \centering
   \caption{Summary of the results obtained in this report. All asymmetries are raw and uncorrected.}
   \label{tab:summary}
-  \begin{tabular}{lc}
+  \begin{tabular}{lcc}
     \toprule
-    Quantity & Value \\
+    Quantity & MagnetDown & MagnetUp \\
     \midrule
-    Candidates in the input sample & $5\,135\,823$ \\
-    Candidates after baseline selection & $1645$ \\
-    Candidates inside the fitted mass range & $1445$ \\
+    Candidates in the input sample & $5\,135\,823$ & $3\,420\,295$ \\
+    Candidates after baseline selection & $1645$ & $1294$ \\
+    Candidates inside the fitted mass range & $1445$ & $1128$ \\
+    $N(\Bplus)$ & $686 \pm 28$ & $548 \pm 24$ \\
+    $N(\Bminus)$ & $641 \pm 26$ & $515 \pm 24$ \\
+    $A_{\mathrm{raw}}$ & $-0.0337 \pm 0.0286$ & $-0.0305 \pm 0.0315$ \\
+    Toy p-value of the simultaneous fit & $0.025$ & $0.30$ \\
+    Toy p-value, \Bplus{}/\Bminus{} shape compatibility & $0.043$ & $0.25$ \\
     \midrule
-    Fitted signal yield & $1331 \pm 39$ \\
-    Fitted background yield & $114 \pm 17$ \\
-    Fitted peak position & $5284.7 \pm 0.6~\mevcc$ \\
-    Fitted mass resolution & $19.5 \pm 0.5~\mevcc$ \\
-    $\chi^2/\mathrm{ndof}$ of the nominal fit & $0.90$ \\
+    \multicolumn{3}{l}{Both polarities} \\
     \midrule
-    $N(\Bplus)$ & $689.1 \pm 28.6$ \\
-    $N(\Bminus)$ & $642.1 \pm 26.2$ \\
-    Toy p-value of the \Bplus{} / \Bminus{} fits & $0.035$ / $0.43$ \\
-    $A_{\mathrm{raw}}$ & $-0.0353 \pm 0.0290\,\mathrm{(stat.)} \pm 0.0437\,\mathrm{(syst.)}$ \\
-    \midrule
-    Toy-MC pull width / bias & $0.9999$ / $<10^{-4}$ \\
-    Counting asymmetry in the signal window & $-0.0416 \pm 0.0275$ \\
-    Largest local Dalitz significance (23 bins) & $2.3$ (global $p = 0.40$) \\
-    Classifier AUC (sideband labels) & $0.528$ \\
+    Fitted signal / background yield & \multicolumn{2}{c}{$2394 \pm 52$ / $180 \pm 21$} \\
+    Fitted peak position / resolution & \multicolumn{2}{c}{$5284.7 \pm 0.4$ / $19.5 \pm 0.4~\mevcc$} \\
+    $A_{\mathrm{raw}}$, polarity average & \multicolumn{2}{c}{$-0.0321 \pm 0.0213\,\mathrm{(stat.)} \pm 0.0163\,\mathrm{(syst.)}$} \\
+    Toy-MC pull width / bias & \multicolumn{2}{c}{$0.98$ / $-0.0005$} \\
+    Counting asymmetry in the signal window & \multicolumn{2}{c}{$-0.0348 \pm 0.0206$} \\
+    Largest local Dalitz significance (39 bins) & \multicolumn{2}{c}{$2.6$ (global $p = 0.27$)} \\
+    Classifier AUC (sideband labels, MagnetDown) & \multicolumn{2}{c}{$0.528$} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 The invariant-mass reconstruction shows a clear $B$-candidate peak after the
 baseline selection, at a position consistent with the known $B^\pm$
-mass~\cite{pdg}. The charge-separated fits give a raw asymmetry compatible with
-zero within the quoted uncertainties, and the pseudo-experiments show that the
-statistical procedure and its uncertainty are correctly calibrated. Two results
-of this report are negative ones, and they are stated as such: the sideband
-Random Forest does not separate signal from background on this sample, and the
-double-Gaussian signal shape cannot be constrained by it. A third finding
-qualifies the result itself: the fit-model and fit-range systematics are two
-symptoms of one unmodelled low-mass shoulder in the \Bplus{} spectrum, so the
-systematic is taken from the joint envelope of both variations and exceeds the
+mass~\cite{pdg}. The simultaneous charge fits give a raw asymmetry compatible with
+zero within the quoted uncertainties, consistent between the two magnet
+polarities, and the pseudo-experiments show that the statistical procedure and its
+uncertainty are correctly calibrated. Two results of this report are negative
+ones, and they are stated as such: the sideband Random Forest does not separate
+signal from background on this sample, and the double-Gaussian signal shape
+cannot be constrained by it.
+
+A third finding concerns the method. An excess on the low-mass flank of the
+MagnetDown \Bplus{} peak, a fluctuation of about two standard deviations that the
+independent MagnetUp sample does not reproduce, was absorbed by the \Bplus{}
+background when the two charges were fitted separately. That made the asymmetry
+depend on the fit range and the fit model, and it dominated the uncertainty
+budget. Fitting the charges simultaneously with shared shapes, and averaging the
+two polarities, removes that sensitivity: the systematic falls below the
 statistical uncertainty.
 
 The analysis remains intentionally simplified and does not constitute a precision
 flavour-physics measurement. Several improvements would be required for a full
 experimental analysis:
 \begin{itemize}
-  \item model the partially reconstructed and misidentified contributions below
-        $5200~\mevcc$ explicitly, instead of excluding that region; their tail
-        under the \Bplus{} peak drives the whole systematic budget here;
-  \item combine the MagnetUp and MagnetDown samples to cancel charge-dependent
-        detector effects, and use a control channel to remove production and
-        detection asymmetries;
+  \item use a control channel to remove the production asymmetry and the kaon
+        detection asymmetry that the polarity average does not cancel;
+  \item calibrate the momentum scale separately for each charge and polarity, for
+        which the opposite peak-position shifts of the two polarities give a hint;
+  \item model the partially reconstructed contributions below $5200~\mevcc$
+        explicitly, with a shape constrained by simulation, since the ntuple
+        boundary at $5050~\mevcc$ leaves too little of it to constrain from data;
   \item include detector effects, PID calibration, trigger efficiencies, and
         reconstruction asymmetries, validated on simulation and control samples;
   \item implement signal-shape alternatives such as a Crystal Ball function, on a

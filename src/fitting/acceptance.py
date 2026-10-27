@@ -89,3 +89,28 @@ def barlow_shift(delta, sigma_variation, sigma_nominal) -> dict:
         "barlow_significance": significance,
         "barlow_corrected_shift": corrected,
     }
+
+
+def simultaneous_fit_acceptance(results_by_polarity: Mapping, max_chi2_ndof: float = DEFAULT_MAX_CHI2_NDOF):
+    """Apply the same pre-registered criteria to simultaneous B+/B- fits.
+
+    Every polarity's fit must converge to a valid minimum, both charge yields
+    and their uncertainties must be positive, and the chi2/ndof of each of the
+    two charge spectra must stay below ``max_chi2_ndof``. Returns
+    ``(accepted, reason)``.
+    """
+    reasons = []
+    for polarity, result in results_by_polarity.items():
+        status = result.get("fit_status", {})
+        if not status.get("success") or not status.get("valid"):
+            reasons.append(f"{polarity}: fit did not converge")
+            continue
+        for charge, label in (("plus", "B+"), ("minus", "B-")):
+            chi2_ndof = result.get("fit_quality", {}).get(charge, {}).get("chi2_ndof")
+            if chi2_ndof is None or chi2_ndof >= max_chi2_ndof:
+                reasons.append(f"{polarity} {label} chi2/ndof >= {max_chi2_ndof:g}")
+            if not _positive(result.get(f"N_{charge}")):
+                reasons.append(f"{polarity} {label} fitted yield is not positive")
+            if not _positive(result.get(f"sigma_N_{charge}")):
+                reasons.append(f"{polarity} {label} fitted yield uncertainty is not positive")
+    return len(reasons) == 0, "; ".join(reasons)

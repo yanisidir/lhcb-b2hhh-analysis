@@ -1,6 +1,10 @@
 {
   "study": "local Dalitz-plane raw asymmetry",
-  "data_path": "data/raw/B2HHH_MagnetDown.root",
+  "data_paths": {
+    "MagnetDown": "data/raw/B2HHH_MagnetDown.root",
+    "MagnetUp": "data/raw/B2HHH_MagnetUp.root"
+  },
+  "polarities": "pooled: both magnet polarities counted together",
   "selection": "src.physics.selection.prepare_selected_candidates",
   "dalitz_variables": {
     "x": "m_KK_low_sq",
@@ -29,27 +33,27 @@
     13.712432013124467
   ],
   "y_edges": [
-    3.164960272963524,
-    5.1354674354580885,
-    7.1059745979526525,
-    9.076481760447217,
-    11.04698892294178,
-    13.017496085436346,
-    14.98800324793091,
-    16.958510410425472,
-    18.92901757292004,
-    20.8995247354146,
-    22.870031897909165
+    3.1642355693683624,
+    5.166009652988244,
+    7.167783736608124,
+    9.169557820228006,
+    11.171331903847886,
+    13.173105987467768,
+    15.174880071087648,
+    17.176654154707528,
+    19.17842823832741,
+    21.18020232194729,
+    23.18197640556717
   ],
-  "n_candidates": 1323,
-  "n_candidates_plus": 689,
-  "n_candidates_minus": 634,
-  "global_counting_A_raw": -0.04157218442932729,
-  "global_counting_sigma_A_raw": 0.027469102459551052,
+  "n_candidates": 2358,
+  "n_candidates_plus": 1220,
+  "n_candidates_minus": 1138,
+  "global_counting_A_raw": -0.03477523324851569,
+  "global_counting_sigma_A_raw": 0.020580946366242674,
   "n_bins_total": 100,
-  "n_bins_passing_min_count": 23,
-  "n_bins_masked_low_count": 77,
-  "max_abs_significance_passing_bins": 2.2883102141894214,
-  "global_p_value_of_max_significance": 0.40217583903264364,
+  "n_bins_passing_min_count": 39,
+  "n_bins_masked_low_count": 61,
+  "max_abs_significance_passing_bins": 2.644660855349868,
+  "global_p_value_of_max_significance": 0.2740144109683972,
   "caveat": "Raw local asymmetry diagnostic only; no corrections are applied for detector efficiency, background contamination, production asymmetry, migration across Dalitz bins, or phase-space acceptance."
 }

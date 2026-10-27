@@ -70,3 +70,18 @@ def prepare_selected_candidates(data_path: str | Path):
     df = load_b2hhh_dataframe(data_path)
     df = add_b_mass(df)
     return apply_baseline_selection(df)
+
+
+def split_by_charge(df):
+    """Return the B+ and B- candidates, by the total charge of the three daughters."""
+    total_charge = df["H1_Charge"] + df["H2_Charge"] + df["H3_Charge"]
+    return df.loc[total_charge == 1].copy(), df.loc[total_charge == -1].copy()
+
+
+def load_charge_samples(data_paths):
+    """Return ``{polarity: (B+ masses, B- masses)}`` after the baseline selection."""
+    samples = {}
+    for polarity, data_path in data_paths.items():
+        b_plus, b_minus = split_by_charge(prepare_selected_candidates(data_path))
+        samples[polarity] = (b_plus["B_mass"].to_numpy(), b_minus["B_mass"].to_numpy())
+    return samples

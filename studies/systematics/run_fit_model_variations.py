@@ -1,434 +1,96 @@
 #!/usr/bin/env python
-"""Fit-model variation study for charge-separated raw asymmetry extraction."""
+"""Fit-model variations of the polarity-averaged raw asymmetry, on the nominal range.
+
+This is the one-at-a-time model diagnostic. The systematic itself is the joint
+model x range envelope of ``run_joint_variations.py``, because the two sources
+are not independent.
+"""
 
 from __future__ import annotations
 
 import argparse
-import csv
-import json
 import sys
 from pathlib import Path
-
-import numpy as np
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.fitting.acceptance import fit_quality_acceptance, status_summary
-from src.fitting.asymmetry import raw_asymmetry
-from src.fitting.fit_mass import fit_mass_distribution
-from src.physics.selection import prepare_selected_candidates
-from src.plotting.mass_plots import configure_matplotlib_cache, set_hep_style
-from src.utils.io import DEFAULT_DATA_PATH, display_path, json_safe, write_json
+from src.fitting.acceptance import DEFAULT_MAX_CHI2_NDOF
+from src.physics.selection import load_charge_samples
+from src.utils.io import DEFAULT_DATA_PATHS, display_path, write_json
+from studies.systematics.configurations import (
+    evaluate_configuration,
+    implemented_models,
+    nominal_range,
+    pending_models,
+    write_rows_csv,
+    write_variation_plot,
+)
 
 
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "systematics"
-MODEL_VARIATIONS = [
-    {
-        "model_name": "nominal_gaussian_exponential",
-        "signal_model": "gaussian",
-        "background_model": "exponential",
-        "variation_role": "nominal",
-        "is_nominal": True,
-    },
-    {
-        "model_name": "gaussian_linear_background",
-        "signal_model": "gaussian",
-        "background_model": "linear",
-        "variation_role": "candidate_systematic",
-        "is_nominal": False,
-    },
-    {
-        "model_name": "double_gaussian_exponential",
-        "signal_model": "double_gaussian",
-        "background_model": "exponential",
-        "variation_role": "candidate_systematic",
-        "is_nominal": False,
-    },
-    {
-        "model_name": "double_gaussian_linear_background",
-        "signal_model": "double_gaussian",
-        "background_model": "linear",
-        "variation_role": "candidate_systematic",
-        "is_nominal": False,
-    },
-    {
-        "model_name": "double_gaussian_polynomial_background",
-        "signal_model": "double_gaussian",
-        "background_model": "polynomial",
-        "variation_role": "candidate_systematic",
-        "is_nominal": False,
-        "implemented": False,
-        "pending_reason": "Pending: polynomial background support requires extending the fit-model interface.",
-    },
-    {
-        "model_name": "crystal_ball_exponential",
-        "signal_model": "crystal_ball",
-        "background_model": "exponential",
-        "variation_role": "candidate_systematic",
-        "is_nominal": False,
-        "implemented": False,
-        "pending_reason": "Pending: Crystal Ball signal support requires extending the signal-model interface.",
-    },
-]
 
 
-def _fit_charge_sample(
-    masses,
-    fit_range,
-    bins: int,
-    signal_model: str,
-    background_model: str,
-):
-    return fit_mass_distribution(
-        masses,
-        fit_range=fit_range,
-        bins=bins,
-        signal_model=signal_model,
-        background_model=background_model,
-    )
-
-
-def _variation_row(
-    variation,
-    plus_result,
-    minus_result,
-    n_plus_candidates: int,
-    n_minus_candidates: int,
-    max_chi2_ndof: float,
-):
-    asymmetry = raw_asymmetry(
-        plus_result,
-        minus_result,
-        n_plus_candidates=n_plus_candidates,
-        n_minus_candidates=n_minus_candidates,
-    )
-    plus_status = status_summary(plus_result)
-    minus_status = status_summary(minus_result)
-    row = {
-        "model_name": variation["model_name"],
-        "signal_model": variation["signal_model"],
-        "background_model": variation["background_model"],
-        "variation_role": variation["variation_role"],
-        "is_nominal": variation["is_nominal"],
-        "N_plus": asymmetry["N_plus"],
-        "sigma_N_plus": asymmetry["sigma_N_plus"],
-        "N_minus": asymmetry["N_minus"],
-        "sigma_N_minus": asymmetry["sigma_N_minus"],
-        "A_raw": asymmetry["A_raw"],
-        "sigma_A_raw": asymmetry["sigma_A_raw"],
-        "chi2_ndof_plus": plus_result.get("fit_quality", {}).get("chi2_ndof"),
-        "chi2_ndof_minus": minus_result.get("fit_quality", {}).get("chi2_ndof"),
-        "fit_success_plus": plus_status["success"],
-        "fit_success_minus": minus_status["success"],
-        "fit_valid_plus": plus_status["valid"],
-        "fit_valid_minus": minus_status["valid"],
-        "fit_backend_plus": plus_status["backend"],
-        "fit_backend_minus": minus_status["backend"],
-        "fit_status_plus": plus_status["message"],
-        "fit_status_minus": minus_status["message"],
-    }
-    accepted, rejection_reason = fit_quality_acceptance(row, max_chi2_ndof)
-    row["accepted_for_systematic"] = accepted
-    row["rejection_reason"] = rejection_reason
-    return row
-
-
-def run_variations(
-    plus_masses,
-    minus_masses,
-    n_plus_candidates: int,
-    n_minus_candidates: int,
-    fit_range,
-    bins: int,
-    max_chi2_ndof: float,
-):
-    rows = []
-    for variation in MODEL_VARIATIONS:
-        if not variation.get("implemented", True):
-            print(f"{variation['model_name']}: pending ({variation['pending_reason']})")
-            continue
-        try:
-            plus_result = _fit_charge_sample(
-                plus_masses,
-                fit_range,
-                bins,
-                variation["signal_model"],
-                variation["background_model"],
-            )
-            minus_result = _fit_charge_sample(
-                minus_masses,
-                fit_range,
-                bins,
-                variation["signal_model"],
-                variation["background_model"],
-            )
-        except NotImplementedError as exc:
-            print(f"{variation['model_name']}: pending ({exc})")
-            continue
-        rows.append(
-            _variation_row(
-                variation,
-                plus_result,
-                minus_result,
-                n_plus_candidates,
-                n_minus_candidates,
-                max_chi2_ndof,
-            )
-        )
-        print(
-            f"{variation['model_name']}: "
-            f"A_raw={rows[-1]['A_raw']:.5f}, "
-            f"sigma={rows[-1]['sigma_A_raw']:.5f}, "
-            f"accepted={rows[-1]['accepted_for_systematic']}"
-        )
-    return rows
-
-
-def write_csv(rows, output_path: Path):
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = list(rows[0]) if rows else []
-    with output_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(json_safe(row) for row in rows)
-
-
-def _summary_entry(row, nominal_a_raw):
-    delta = row["A_raw"] - nominal_a_raw if row["A_raw"] is not None else None
-    return {
-        "model_name": row["model_name"],
-        "signal_model": row["signal_model"],
-        "background_model": row["background_model"],
-        "variation_role": row["variation_role"],
-        "A_raw": row["A_raw"],
-        "sigma_A_raw": row["sigma_A_raw"],
-        "delta_A_raw": delta,
-        "is_nominal": row["is_nominal"],
-        "accepted_for_systematic": row["accepted_for_systematic"],
-        "rejection_reason": row["rejection_reason"],
-        "fit_success_plus": row["fit_success_plus"],
-        "fit_success_minus": row["fit_success_minus"],
-        "chi2_ndof_plus": row["chi2_ndof_plus"],
-        "chi2_ndof_minus": row["chi2_ndof_minus"],
-    }
-
-
-def summarize_variations(rows, fit_range, bins: int, max_chi2_ndof: float):
-    nominal = next((row for row in rows if row["is_nominal"]), None)
-    if nominal is None:
-        raise ValueError("No nominal model variation was run.")
-
-    nominal_a_raw = nominal["A_raw"]
-    tested_variations = [_summary_entry(row, nominal_a_raw) for row in rows]
-    accepted_variations = [
-        entry
-        for entry in tested_variations
-        if entry["accepted_for_systematic"] and not entry["is_nominal"]
-    ]
-    rejected_stress_tests = [
-        entry
-        for entry in tested_variations
-        if entry["variation_role"] == "stress_test" and not entry["accepted_for_systematic"]
-    ]
-    rejected_candidate_variations = [
-        entry
-        for entry in tested_variations
-        if (
-            entry["variation_role"] == "candidate_systematic"
-            and not entry["accepted_for_systematic"]
-        )
-    ]
-    accepted_deltas = [
-        abs(entry["delta_A_raw"])
-        for entry in accepted_variations
-        if entry["delta_A_raw"] is not None
-    ]
-
-    pending_variations = [
-        {
-            "model_name": variation["model_name"],
-            "signal_model": variation["signal_model"],
-            "background_model": variation["background_model"],
-            "variation_role": variation["variation_role"],
-            "reason": variation["pending_reason"],
-        }
-        for variation in MODEL_VARIATIONS
-        if not variation.get("implemented", True)
-    ]
-
-    recommended = max(accepted_deltas) if accepted_deltas else None
-    status = (
-        "complete with accepted model variations"
-        if accepted_deltas
-        else "pending additional accepted model variations"
-    )
-    max_abs_delta_all_tested = 0.0
-    all_deltas = [
-        abs(entry["delta_A_raw"])
-        for entry in tested_variations
-        if entry["delta_A_raw"] is not None
-    ]
-    if all_deltas:
-        max_abs_delta_all_tested = max(all_deltas)
-
-    return {
-        "status": status,
-        "nominal_model": nominal["model_name"],
-        "nominal_A_raw": nominal_a_raw,
-        "all_tested_model_variations": tested_variations,
-        "accepted_systematic_variations": accepted_variations,
-        "rejected_stress_test_variations": rejected_stress_tests,
-        "rejected_candidate_systematic_variations": rejected_candidate_variations,
-        "pending_model_variations": pending_variations,
-        "max_abs_delta_A_raw_all_tested": max_abs_delta_all_tested,
-        "max_abs_delta_A_raw_accepted": recommended,
-        "recommended_model_systematic": recommended,
-        "fit_quality_criteria": {
-            "max_chi2_ndof": max_chi2_ndof,
-            "require_converged_B_plus": True,
-            "require_converged_B_minus": True,
-            "require_positive_yields": True,
-            "require_positive_yield_uncertainties": True,
-        },
-        "fit_range": list(fit_range),
-        "bins": int(bins),
-        "note": (
-            "First fit-model systematic with quality filtering. Stress-test models are "
-            "reported but are not used as systematic uncertainties unless they provide "
-            "an acceptable description of both charge-separated mass spectra."
-        ),
-    }
-
-
-def write_variation_plot(rows, output_path: Path):
-    configure_matplotlib_cache()
-    import matplotlib
-
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    set_hep_style()
-    labels = [row["model_name"].replace("_", "\n") for row in rows]
-    values = np.array([row["A_raw"] for row in rows], dtype=float)
-    errors = np.array([row["sigma_A_raw"] for row in rows], dtype=float)
+def summarize(rows, bins: int, max_chi2_ndof: float):
     nominal = next(row for row in rows if row["is_nominal"])
-    colors = [
-        "#4c78a8" if row["accepted_for_systematic"] else "#d62728"
-        for row in rows
-    ]
-
-    fig, ax = plt.subplots(figsize=(8.0, 4.8))
-    x = np.arange(len(rows))
-    for i, row in enumerate(rows):
-        ax.errorbar(
-            x[i],
-            values[i],
-            yerr=errors[i],
-            fmt="o",
-            color=colors[i],
-            capsize=4,
-            label=(
-                "Accepted quality"
-                if row["accepted_for_systematic"]
-                and not row["is_nominal"]
-                and not any(
-                    previous["accepted_for_systematic"] and not previous["is_nominal"]
-                    for previous in rows[:i]
-                )
-                else None
-            ),
-        )
-    ax.axhline(nominal["A_raw"], color="#4c78a8", linewidth=2.0, label="Nominal")
-    ax.set_xticks(x)
-    ax.set_xticklabels(labels)
-    ax.set_ylabel(r"$A_{\rm raw}$")
-    ax.set_title("Fit-model variation of raw asymmetry")
-    ax.legend(frameon=False)
-    ax.grid(True, axis="y", alpha=0.25)
-    fig.tight_layout()
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, dpi=300, bbox_inches="tight")
-    plt.close(fig)
+    for row in rows:
+        row["delta_A_raw"] = None if row["A_raw"] is None else row["A_raw"] - nominal["A_raw"]
+    variations = [row for row in rows if not row["is_nominal"]]
+    accepted = [row for row in variations if row["accepted_for_systematic"]]
+    shifts = [abs(row["delta_A_raw"]) for row in accepted if row["delta_A_raw"] is not None]
+    return {
+        "study": "fit-model variations, one at a time, on the nominal fit range",
+        "nominal_model": nominal["model_name"],
+        "fit_range": [nominal["fit_range_low"], nominal["fit_range_high"]],
+        "nominal_A_raw": nominal["A_raw"],
+        "all_tested_model_variations": rows,
+        "accepted_variations": accepted,
+        "rejected_variations": [row for row in variations if not row["accepted_for_systematic"]],
+        "pending_model_variations": [
+            {"model_name": model["model_name"], "reason": model["pending_reason"]} for model in pending_models()
+        ],
+        "max_abs_delta_A_raw_accepted": max(shifts) if shifts else None,
+        "recommended_model_systematic": max(shifts) if shifts else None,
+        "role": "diagnostic; the quoted systematic is the joint model x range envelope",
+        "max_chi2_ndof": max_chi2_ndof,
+        "bins": int(bins),
+    }
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data", type=Path, default=DEFAULT_DATA_PATH, help="Input ROOT ntuple.")
     parser.add_argument("--bins", type=int, default=80, help="Number of fitted mass bins.")
     parser.add_argument(
         "--max-chi2-ndof",
         type=float,
-        default=2.5,
-        help="Maximum chi2/ndof allowed for accepted systematic variations.",
+        default=DEFAULT_MAX_CHI2_NDOF,
+        help="Maximum chi2/ndof allowed for accepted variations.",
     )
-    parser.add_argument(
-        "--fit-range",
-        type=float,
-        nargs=2,
-        default=(5200.0, 5600.0),
-        metavar=("LOW", "HIGH"),
-        help="Fitted invariant-mass range in MeV/c^2.",
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=Path,
-        default=DEFAULT_OUTPUT_DIR,
-        help="Directory for fit-model systematic outputs.",
-    )
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help="Output directory.")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    data_path = args.data.resolve()
     output_dir = args.output_dir.resolve()
-    fit_range = tuple(float(value) for value in args.fit_range)
-    if not fit_range[0] < fit_range[1]:
-        raise ValueError("--fit-range must be an increasing LOW HIGH interval.")
-    if args.bins <= 0:
-        raise ValueError("--bins must be positive.")
-    if args.max_chi2_ndof <= 0:
-        raise ValueError("--max-chi2-ndof must be positive.")
-    if not data_path.exists():
-        raise FileNotFoundError(f"Input ROOT file not found: {data_path}")
+    samples = load_charge_samples(DEFAULT_DATA_PATHS)
+    rows = []
+    for model in implemented_models():
+        rows.append(evaluate_configuration(samples, model, nominal_range(), args.bins, args.max_chi2_ndof))
+        print(f"{model['model_name']:36s} A_raw = {rows[-1]['A_raw']:+.5f}   accepted = {rows[-1]['accepted_for_systematic']}")
+    summary = summarize(rows, args.bins, args.max_chi2_ndof)
 
-    selected = prepare_selected_candidates(data_path).copy()
-    selected["total_charge"] = (
-        selected["H1_Charge"] + selected["H2_Charge"] + selected["H3_Charge"]
-    )
-    b_plus = selected.loc[selected["total_charge"] == 1].copy()
-    b_minus = selected.loc[selected["total_charge"] == -1].copy()
-
-    rows = run_variations(
-        b_plus["B_mass"].to_numpy(),
-        b_minus["B_mass"].to_numpy(),
-        n_plus_candidates=len(b_plus),
-        n_minus_candidates=len(b_minus),
-        fit_range=fit_range,
-        bins=args.bins,
-        max_chi2_ndof=args.max_chi2_ndof,
-    )
-    summary = summarize_variations(rows, fit_range, args.bins, args.max_chi2_ndof)
-
-    output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "fit_model_variations.csv"
     summary_path = output_dir / "fit_model_summary.json"
     plot_path = output_dir / "fit_model_variations.png"
-    write_csv(rows, csv_path)
-    summary_path.write_text(json.dumps(json_safe(summary), indent=2) + "\n", encoding="utf-8")
-    write_variation_plot(rows, plot_path)
-
-    recommended = summary["recommended_model_systematic"]
-    if recommended is None:
-        print("Recommended model systematic: pending additional accepted model variations")
-    else:
-        print(f"Recommended model systematic: {recommended:.6f}")
-    print(f"Wrote {display_path(csv_path)}")
-    print(f"Wrote {display_path(summary_path)}")
-    print(f"Wrote {display_path(plot_path)}")
+    write_rows_csv(rows, csv_path)
+    write_json(summary_path, summary)
+    write_variation_plot(rows, "model_name", "Fit-model variation of the raw asymmetry", plot_path)
+    print(f"Largest accepted model shift: {summary['recommended_model_systematic']:.6f}")
+    for path in (csv_path, summary_path, plot_path):
+        print(f"Wrote {display_path(path)}")
 
 
 if __name__ == "__main__":

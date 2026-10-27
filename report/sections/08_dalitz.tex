@@ -23,7 +23,7 @@ These coordinates do not depend on the track labelling, and they are the ones th
 
 A Dalitz plot displays the density of selected events in the plane of two pair-mass-squared variables. Resonant two-body substructures appear as bands, while interference and phase-space effects produce non-uniform densities. In a complete amplitude analysis these structures would be modelled with coherent sums of resonant and non-resonant amplitudes; the present analysis restricts itself to visualising the distribution.
 
-Figure~\ref{fig:dalitz_density} shows all selected candidates, without a mass window; the local asymmetry study of Sec.~\ref{sec:local_dalitz} restricts itself to the signal region. The narrow $\phi(1020) \to K^+K^-$ band at $m^2_{\mathrm{low}} \approx 1.04~\gevfour$ is clearly visible, which is a check that the opposite-sign pairs are correctly identified: with label-based pairs the band is diluted across the three combinations.
+Figure~\ref{fig:dalitz_density} shows all selected candidates, without a mass window; the local asymmetry study of Sec.~\ref{sec:local_dalitz} restricts itself to the signal region. The narrow $\phi(1020) \to K^+K^-$ band at $m^2_{\mathrm{low}} \approx 1.04~\gevfour$ is clearly visible, which is a check that the opposite-sign pairs are correctly identified: on MagnetDown, $167$ candidates lie within $12~\mevcc$ of the $\phi$ mass in $m_{\mathrm{low}}(K^+K^-)$, against $101$ in the label-based $m(K_1K_2)$, where the band is diluted across pairs that are sometimes same-sign (notebook \texttt{05}).
 
 \begin{figure}[H]
   \centering
@@ -37,7 +37,7 @@ Dalitz plots are especially relevant for CP-violation studies in multibody decay
 \subsection{Local raw-asymmetry diagnostic}
 \label{sec:local_dalitz}
 
-The local diagnostic uses the candidates of the signal region, $5245 < m(hhh) < 5325~\mevcc$, which is the fitted peak position of Sec.~\ref{sec:mass_fit} widened by twice the fitted resolution. Restricting to that window keeps the diagnostic on the same candidates the mass fits describe; using every selected candidate instead would mix in the sidebands and the low-mass structure excluded from the fits. The window contains $1323$ candidates, $689$ of positive and $634$ of negative charge. Candidates are split into \Bplus{} and \Bminus{} samples using the total reconstructed daughter charge,
+The local diagnostic uses the candidates of the signal region, $5245 < m(hhh) < 5325~\mevcc$, which is the fitted peak position of Sec.~\ref{sec:mass_fit} widened by twice the fitted resolution. Restricting to that window keeps the diagnostic on the same candidates the mass fits describe; using every selected candidate instead would mix in the sidebands and the low-mass structure excluded from the fits. Both magnet polarities are pooled; the samples are of similar size, so this counting diagnostic is close to the equal-weight polarity average used for the fitted asymmetry. The window contains $2358$ candidates, $1220$ of positive and $1138$ of negative charge. Candidates are split into \Bplus{} and \Bminus{} samples using the total reconstructed daughter charge,
 \begin{equation}
   q_{\mathrm{tot}} = q_1 + q_2 + q_3 .
 \end{equation}
@@ -49,15 +49,15 @@ The $m^2_{\mathrm{low}}(K^+K^-)$ versus $m^2_{\mathrm{high}}(K^+K^-)$ plane is t
 \end{equation}
 where $N_+^{ij}$ and $N_-^{ij}$ are the numbers of \Bplus{} and \Bminus{} candidates in that Dalitz bin. The statistical uncertainty is estimated from binomial counting propagation, and a local significance is formed as $A_{\mathrm{raw}}^{ij}/\sigma(A_{\mathrm{raw}}^{ij})$.
 
-The default study uses a $10\times10$ binning and masks bins with fewer than 20 candidates in the asymmetry and significance maps. The bin contents are still stored in the numerical output, but low-statistics regions are not interpreted visually. With this threshold, 23 out of 100 bins pass the requirement; about half of the grid lies outside the folded kinematic region and is empty by construction. The direct counting asymmetry over the whole window is
+The default study uses a $10\times10$ binning and masks bins with fewer than 20 candidates in the asymmetry and significance maps. The bin contents are still stored in the numerical output, but low-statistics regions are not interpreted visually. With this threshold, 39 out of 100 bins pass the requirement; about half of the grid lies outside the folded kinematic region and is empty by construction. The direct counting asymmetry over the whole window is
 \begin{equation}
-  A_{\mathrm{raw}} = -0.0416 \pm 0.0275 ,
+  A_{\mathrm{raw}} = -0.0348 \pm 0.0206 ,
 \end{equation}
-consistent with the fit-based value of Eq.~\ref{eq:raw_asymmetry_fit}, as it should be: the two use the same candidates, one subtracting the fitted background and the other not. The counting value does not correct for detector efficiency, phase-space acceptance, bin migration, production asymmetry, or detector-induced charge asymmetries.
+consistent with the fit-based value of Eq.~\ref{eq:raw_asymmetry_fit}, as it should be: the window is the core of the fitted peak, and the counting differs from the fit mainly in not subtracting the background. The counting value does not correct for detector efficiency, phase-space acceptance, bin migration, production asymmetry, or detector-induced charge asymmetries.
 
-The largest local significance over the 23 populated bins is $2.3$. Treating the bins as independent and each significance as a unit Gaussian under the no-asymmetry hypothesis, the probability that at least one of 23 bins fluctuates that far is
+The largest local significance over the 39 populated bins is $2.6$. Treating the bins as independent and each significance as a unit Gaussian under the no-asymmetry hypothesis, the probability that at least one of 39 bins fluctuates that far is
 \begin{equation}
-  p_{\mathrm{global}} = 1 - \left(1 - p_{\mathrm{local}}\right)^{23} = 0.40 ,
+  p_{\mathrm{global}} = 1 - \left(1 - p_{\mathrm{local}}\right)^{39} = 0.27 ,
 \end{equation}
 so this diagnostic shows no evidence of local structure --- the expected outcome at this sample size. The published LHCb study of local asymmetries in this channel uses a far larger dataset and a finer binning of the Dalitz plane~\cite{lhcb3body}.
 

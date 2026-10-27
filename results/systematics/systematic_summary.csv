@@ -1,8 +1,8 @@
 quantity,value
-nominal_A_raw,-0.03526943671183539
-statistical_uncertainty,0.029043570218278723
-fit_model_systematic,0.030535393032552254
-fit_range_systematic,0.02727464719699954
-quadrature_if_independent,0.040942845618901914
-total_systematic_uncertainty,0.04369801417765055
-total_uncertainty,0.0524694712580014
+nominal_A_raw,-0.03208513502310789
+statistical_uncertainty,0.021276620102096737
+fit_model_systematic,0.013937063490569168
+fit_range_systematic,0.0075255632976422675
+quadrature_if_independent,0.01583906063145717
+total_systematic_uncertainty,0.01632189375156451
+total_uncertainty,0.026816017202528557

@@ -274,7 +274,7 @@ def _uncertainties_from_minuit(
     }
 
 
-def _fit_with_iminuit(nll, initial, limits, parameter_labels):
+def _fit_with_iminuit(nll, starts, limits, parameter_labels):
     """Minimise with MIGRAD from every starting point and keep the best minimum.
 
     The single-Gaussian model has one starting point. The double-Gaussian one
@@ -285,9 +285,8 @@ def _fit_with_iminuit(nll, initial, limits, parameter_labels):
     """
     from iminuit import Minuit
 
-    names = list(parameter_labels)
     candidates = []
-    for start in _starting_points(initial, limits, names):
+    for start in starts:
         trial = Minuit(nll, **start)
         trial.errordef = Minuit.LIKELIHOOD
         for name, limit in limits.items():
@@ -314,7 +313,13 @@ def _fit_with_iminuit(nll, initial, limits, parameter_labels):
         "n_valid_starting_points": len(valid),
         "message": "iminuit migrad completed",
     }
-    return values, uncertainties, fit_status, float(minuit.fval)
+    names = list(parameter_labels)
+    covariance = (
+        {a: {b: float(minuit.covariance[a, b]) for b in names} for a in names}
+        if minuit.covariance is not None
+        else None
+    )
+    return values, uncertainties, fit_status, float(minuit.fval), covariance
 
 
 def _numerical_hessian(func, x: np.ndarray, steps: np.ndarray):
@@ -492,22 +497,14 @@ def _chi2_survival(value: float, ndof: int) -> float:
     return float(chi2_distribution.sf(value, ndof))
 
 
-def _result_parameters(
+def _signal_shape_parameters(
     fit_values: Mapping[str, float],
     uncertainties: Mapping[str, float | None],
     signal_model: str,
 ):
-    """Return the reported parameters and the uncertainties that match them."""
-    result = {
-        "signal_yield": fit_values["signal_yield"],
-        "background_yield": fit_values["background_yield"],
-        "mass_mean": fit_values["mean"],
-        "background_slope": fit_values["slope"],
-    }
-
+    """Return the reported signal-shape parameters and their uncertainties."""
     if signal_model == "gaussian":
-        result["mass_resolution"] = fit_values["sigma"]
-        return result, dict(uncertainties)
+        return {"mass_resolution": fit_values["sigma"]}, dict(uncertainties)
 
     uncertainties = dict(uncertainties)
     signal_fraction = fit_values["signal_fraction"]
@@ -530,14 +527,29 @@ def _result_parameters(
     # The effective width mixes three correlated parameters, so propagating its
     # uncertainty needs the full covariance matrix, which is not stored here.
     uncertainties.setdefault("mass_resolution", None)
-    result.update(
-        {
-            "mass_resolution": float(effective_sigma),
-            "mass_resolution_narrow": sigma_narrow,
-            "mass_resolution_wide": sigma_wide,
-            "signal_fraction": signal_fraction,
-        }
-    )
+    shape = {
+        "mass_resolution": float(effective_sigma),
+        "mass_resolution_narrow": sigma_narrow,
+        "mass_resolution_wide": sigma_wide,
+        "signal_fraction": signal_fraction,
+    }
+    return shape, uncertainties
+
+
+def _result_parameters(
+    fit_values: Mapping[str, float],
+    uncertainties: Mapping[str, float | None],
+    signal_model: str,
+):
+    """Return the reported parameters and the uncertainties that match them."""
+    result = {
+        "signal_yield": fit_values["signal_yield"],
+        "background_yield": fit_values["background_yield"],
+        "mass_mean": fit_values["mean"],
+        "background_slope": fit_values["slope"],
+    }
+    shape, uncertainties = _signal_shape_parameters(fit_values, uncertainties, signal_model)
+    result.update(shape)
     return result, uncertainties
 
 
@@ -579,9 +591,9 @@ def fit_mass_distribution(
     nll = _make_nll(counts, bin_edges, fit_range, signal_model, background_model)
 
     try:
-        fit_values, uncertainties, fit_status, fval = _fit_with_iminuit(
+        fit_values, uncertainties, fit_status, fval, _ = _fit_with_iminuit(
             nll,
-            initial,
+            _starting_points(initial, limits, list(parameter_labels)),
             limits,
             parameter_labels,
         )
